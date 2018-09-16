@@ -14,7 +14,7 @@
 
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
 
-@property (nonatomic, strong) MDAlertAction *action;
+@property (nonatomic, strong, readonly) MDAlertAction *action;
 
 @property (nonatomic, assign) BOOL titleAlignmentCenter;
 
@@ -39,45 +39,45 @@
 @interface _MDAlertControllerTextLabel : UILabel
 @end
 
-@protocol MDAlertControllerContentView;
-@protocol MDAlertControllerContentViewDelegate <NSObject>
+@protocol _MDAlertControllerContentView;
+@protocol _MDAlertControllerContentViewDelegate <NSObject>
 
-- (void)contentViewDidCancel:(UIView<MDAlertControllerContentView> *)contentView;
-- (void)contentView:(UIView<MDAlertControllerContentView> *)contentView didSelectAction:(MDAlertAction *)action;
+- (void)contentViewDidCancel:(UIView<_MDAlertControllerContentView> *)contentView;
+- (void)contentView:(UIView<_MDAlertControllerContentView> *)contentView didSelectAction:(MDAlertAction *)action;
 
 @end
 
-@protocol MDAlertControllerContentView <NSObject>
+@protocol _MDAlertControllerContentView <NSObject>
 
-@property (nonatomic, weak) id<MDAlertControllerContentViewDelegate> delegate;
+@property (nonatomic, weak) id<_MDAlertControllerContentViewDelegate> delegate;
 
 @property (nonatomic, copy) NSArray<MDAlertAction *> *actions;
 
 @property (nonatomic, strong) MDAlertAction *preferredAction;
 
+@property (nonatomic, strong) MDAlertDismissAction *dismissAction;
+
+@property (nonatomic, strong) UIView *customView;
+
+@property (nonatomic, strong, readonly) UIButton *dismissButton;
+@property (nonatomic, strong, readonly) UIView *wrapperView;
+@property (nonatomic, strong, readonly) UIView *contentView;
 @property (nonatomic, strong, readonly) UIView *backgroundView;
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
 @property (nonatomic, strong, readonly) UILabel *messageLabel;
 
-@property (nonatomic, strong) UIColor *tintColor;
+@property (nonatomic, strong, readonly) UIColor *tintColor;
+
+- (CAAnimation *)animationForDisplaying:(BOOL)displaying transitionStyle:(MDAlertControllerTransitionStyle)transitionStyle;
 
 - (void)reload;
 
-- (void)displayAnimated:(BOOL)animated completion:(void (^)(void))completion;
-- (void)displayWithAnimation:(CAAnimation *)animation completion:(void (^)(void))completion;
-
-- (void)dismissAnimated:(BOOL)animated completion:(void (^)(void))completion;
-- (void)dismissWithAnimation:(CAAnimation *)animation completion:(void (^)(void))completion;
-
-#pragma mark - private
-
-- (void)_layoutSubviews;
+- (void)display:(BOOL)displaying animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion;
+- (void)display:(BOOL)displaying duration:(CGFloat)duration animations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion;
 
 @end
 
-@interface MDAlertControllerContentView : UIView <MDAlertControllerContentView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource>
-
-@property (nonatomic, strong, readonly) UIView *contentView;
+@interface _MDAlertControllerContentView : UIView <_MDAlertControllerContentView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong, readonly) UITableView *tableView;
 @property (nonatomic, strong, readonly) UITapGestureRecognizer *tapGestureRecognizer;
@@ -86,44 +86,31 @@
 
 @end
 
-@interface MDActionSheetContentView : MDAlertControllerContentView
+@interface _MDActionSheetContentView : _MDAlertControllerContentView
 
 @end
 
-@interface MDAlertContentView : MDAlertControllerContentView
+@interface _MDAlertContentView : _MDAlertControllerContentView
 
-@property (nonatomic, strong) UIView *buttonContentView;
-@property (nonatomic, strong) UIView *lineView;
+@property (nonatomic, strong, readonly) UIView *buttonContentView;
+@property (nonatomic, strong, readonly) UIView *lineView;
 
-@property (nonatomic, strong) NSMutableArray<UIButton *> *buttons;
-@property (nonatomic, strong) NSMutableArray<UIView *> *lines;
+@property (nonatomic, strong, readonly) NSMutableArray<UIButton *> *buttons;
+@property (nonatomic, strong, readonly) NSMutableArray<UIView *> *lines;
 
 @end
 
 @interface MDAlertAction ()
 
-@property (nonatomic, assign) MDAlertActionStyle style;
-
-@property (nonatomic, strong) UIImage *image;
-
-@property (nonatomic, copy) NSString *title;
-
-@property (nonatomic, copy) void (^handler)(MDAlertAction *action);
+@property (nonatomic, copy, readonly) void (^handler)(MDAlertAction *action);
 
 @end
 
-@interface MDAlertController ()<MDAlertControllerContentViewDelegate> {
-    dispatch_once_t _onceToken;
-    NSString *_alertTitle;
-}
+@interface MDAlertController ()<_MDAlertControllerContentViewDelegate, UIViewControllerTransitioningDelegate>
 
-@property (nonatomic, copy) NSArray<MDAlertAction *> *actions;
+@property (nonatomic, copy, readonly) NSArray<MDAlertAction *> *rowActions;
 
-@property (nonatomic, copy) NSArray<MDAlertAction *> *rowActions;
-
-@property (nonatomic, assign) MDAlertControllerStyle preferredStyle;
-
-@property (nonatomic, strong) UIView<MDAlertControllerContentView> *contentView;
+@property (nonatomic, strong, readonly) UIView<_MDAlertControllerContentView> *contentView;
 
 @end
 

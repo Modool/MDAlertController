@@ -22,9 +22,20 @@ typedef NS_ENUM(NSUInteger, MDAlertActionStyle) {
     MDAlertActionStyleDestructive
 };
 
-typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
-    MDAlertControllerStyleActionSheet = 0,
-    MDAlertControllerStyleAlert
+typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
+    MDAlertActionPositionLeft  = 1 << 0,
+    MDAlertActionPositionRight = 1 << 1,
+    MDAlertActionPositionTop   = 1 << 2,
+    MDAlertActionPositionBottom = 1 << 3,
+
+    MDAlertActionPositionLeftTop = MDAlertActionPositionLeft | MDAlertActionPositionTop,
+    MDAlertActionPositionLeftBottom = MDAlertActionPositionLeft | MDAlertActionPositionBottom,
+    MDAlertActionPositionRightTop = MDAlertActionPositionRight | MDAlertActionPositionTop,
+    MDAlertActionPositionRightBottom = MDAlertActionPositionRight | MDAlertActionPositionBottom,
+
+    MDAlertActionPositionHorizontalCenter = MDAlertActionPositionLeft | MDAlertActionPositionRight,
+    MDAlertActionPositionVerticalCenter = MDAlertActionPositionTop | MDAlertActionPositionBottom,
+    MDAlertActionPositionCenter = MDAlertActionPositionHorizontalCenter | MDAlertActionPositionVerticalCenter
 };
 
 @interface MDAlertAction : NSObject
@@ -44,7 +55,7 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
 
 @property (nonatomic, strong, readonly) UIImage *image;
 
-@property (nonatomic, strong, readonly) UIImage *selectedImage;
+@property (nonatomic, strong) UIImage *selectedImage;
 
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
 @property (nonatomic, assign, getter=isSelected) BOOL selected;
@@ -56,6 +67,56 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
 
 @end
 
+@interface MDAlertDismissAction : MDAlertAction
+
+@property (nonatomic, assign, readonly) MDAlertActionPosition position;
+
+/// Default is 'sizeToFit'.
+@property (nonatomic, assign) CGSize size;
+
+@property (nonatomic, strong) UIImage *selectedImage NS_UNAVAILABLE;
+
+@property (nonatomic, assign, getter=isEnabled) BOOL enabled NS_UNAVAILABLE;
+@property (nonatomic, assign, getter=isSelected) BOOL selected NS_UNAVAILABLE;
+
++ (instancetype)actionWithTitle:(NSString *)title style:(MDAlertActionStyle)style handler:(void (^)(MDAlertAction *action))handler NS_UNAVAILABLE;
++ (instancetype)actionWithTitle:(NSString *)title image:(UIImage *)image style:(MDAlertActionStyle)style handler:(void (^)(MDAlertAction *action))handler NS_UNAVAILABLE;
+
++ (instancetype)actionWithTitle:(NSString *)title position:(MDAlertActionPosition)position handler:(void (^)(MDAlertAction *action))handler;
++ (instancetype)actionWithImage:(UIImage *)image position:(MDAlertActionPosition)position handler:(void (^)(MDAlertAction *action))handler;
+
+@end
+
+typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
+    MDAlertControllerStyleActionSheet = 0,
+    MDAlertControllerStyleAlert
+};
+
+typedef NS_ENUM(NSInteger, MDAlertControllerTransitionStyle) {
+    MDAlertControllerTransitionStyleDefault = 0,
+
+    MDAlertControllerTransitionStyleFade,
+    MDAlertControllerTransitionStylePush,
+    MDAlertControllerTransitionStyleReveal,
+    MDAlertControllerTransitionStyleMoveIn,
+
+    MDAlertControllerTransitionStyleCube,
+    MDAlertControllerTransitionStyleFlip,
+    MDAlertControllerTransitionStylePageCurl,
+    MDAlertControllerTransitionStylePageUnCurl,
+    MDAlertControllerTransitionStyleSuckEffect,
+    MDAlertControllerTransitionStyleRippleEffect,
+    MDAlertControllerTransitionStyleCameraIrisHollowOpen,
+    MDAlertControllerTransitionStyleCameraIrisHollowClose,
+
+    MDAlertControllerTransitionStyleMaximum = 0xFF,
+
+    MDAlertControllerTransitionFromLeft  = 1 << 9,
+    MDAlertControllerTransitionFromRight  = 1 << 10,
+    MDAlertControllerTransitionFromTop = 1 << 11,
+    MDAlertControllerTransitionFromBottom = 1 << 12,
+};
+
 @interface MDAlertController : UIViewController
 
 @property (nonatomic, assign, readonly) MDAlertControllerStyle preferredStyle;
@@ -64,6 +125,8 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
 
 @property (nonatomic, strong) MDAlertAction *preferredAction;
 
+// The custom view in content view.
+@property (nonatomic, strong) UIView *customView;
 // Default is 0x000000, 0.5
 @property (nonatomic, strong) UIColor *backgroundColor;
 
@@ -74,6 +137,11 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
 
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
+
+/// Default transition is modal alert or action sheet
+@property (nonatomic, assign) MDAlertControllerTransitionStyle transitionStyle;
+/// Default is .25f;
+@property (nonatomic, assign) NSTimeInterval transitionDuration;
 
 // Default is YES if preferredStyle is MDAlertControllerStyleActionSheet.
 @property (nonatomic, assign) BOOL backgroundTouchabled;
