@@ -53,36 +53,50 @@
 }
 
 - (IBAction)didClickAlert:(id)sender{
-////    MDAlertController *alertController = [[[MDAlertController alertNamed:@"name" message:@"message"] actionNamed:@"确认"] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
+//    MDAlertController *alertController = [[[MDAlertController alertNamed:@"name" message:@"message"] actionNamed:@"确认"] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
 //    MDAlertController *alertController = [[[MDAlertController alertNamed:nil message:nil] actionNamed:@"确定"] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
-////    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"确定"];
-////    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
-////    MDAlertController *alertController = [MDAlertController alertNamed:nil message:nil];
-//
-//    alertController.transitionStyle = MDAlertControllerTransitionStyleMoveIn | MDAlertControllerTransitionFromLeft;
-//    alertController.transitionDuration = .5f;
-//
-//    alertController.tintColor = [UIColor redColor];
-////    alertController.backgroundColor = [UIColor colorWithRed:0 green:0 blue:1 alpha:0.5];
-//
-//    UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
-//    customView.backgroundColor = [UIColor redColor];
-//    alertController.customView = customView;
-//
-////    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-////    animation.fromValue = @(0);
-////    animation.toValue = @(2 * M_PI);
-////    animation.repeatCount = 3;
-////    animation.duration = 0.25;
-//
-////    alertController.dismissingAnimation = animation;
-//
-//    [self presentViewController:alertController animated:YES completion:nil];
-//
-////    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-////        ViewController2 *viewController2 = [[ViewController2 alloc] init];
-////        [alertController presentViewController:viewController2 animated:YES completion:nil];
-////    });
+//    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"确定"];
+//    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
+    MDAlertController *alertController = [MDAlertController alertNamed:nil message:nil];
+    alertController.backgroundTouchabled = YES;
+
+    alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionAlign | MDAlertControllerAnimationOptionDirectionFromLeft;
+    alertController.transitionDuration = .15f;
+
+    alertController.tintColor = [UIColor redColor];
+    alertController.backgroundColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5];
+    alertController.overridable = YES;
+
+    UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
+    customView.backgroundColor = [UIColor redColor];
+    alertController.customView = customView;
+
+//    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+//    animation.fromValue = @(0);
+//    animation.toValue = @(2 * M_PI);
+//    animation.repeatCount = 3;
+//    animation.duration = 0.25;
+
+//    alertController.dismissingAnimation = animation;
+
+    [self presentViewController:alertController animated:YES completion:nil];
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        MDAlertController *alertController2 = [MDAlertController alertNamed:nil message:nil];
+        alertController2.backgroundTouchabled = YES;
+
+        alertController2.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | MDAlertControllerAnimationOptionDirectionFromBottom;
+        alertController2.transitionDuration = .15f;
+
+        alertController2.tintColor = [UIColor blueColor];
+        alertController2.backgroundColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5];
+
+        UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
+        customView.backgroundColor = [UIColor blueColor];
+        alertController2.customView = customView;
+
+        [alertController presentViewController:alertController2 animated:YES completion:nil];
+    });
 }
 
 - (IBAction)didClickActionSheet:(id)sender{

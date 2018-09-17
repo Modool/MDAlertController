@@ -68,7 +68,9 @@
 
 @property (nonatomic, strong, readonly) UIColor *tintColor;
 
-- (CAAnimation *)animationForDisplaying:(BOOL)displaying transitionStyle:(MDAlertControllerTransitionStyle)transitionStyle;
+- (MDAlertControllerAnimationOptions)optionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying;
+- (CAAnimation *)alphaAnimationForDisplaying:(BOOL)displaying;
+- (CAAnimation *)positionAnimationForDisplaying:(BOOL)displaying direction:(MDAlertControllerAnimationOptions)direction center:(BOOL)center;
 
 - (void)reload;
 
@@ -111,6 +113,8 @@
 @property (nonatomic, copy, readonly) NSArray<MDAlertAction *> *rowActions;
 
 @property (nonatomic, strong, readonly) UIView<_MDAlertControllerContentView> *contentView;
+
+@property (nonatomic, strong) MDAlertController *previousAlertController;
 
 @end
 

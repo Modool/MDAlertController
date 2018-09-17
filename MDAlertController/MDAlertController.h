@@ -92,29 +92,39 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
     MDAlertControllerStyleAlert
 };
 
-typedef NS_ENUM(NSInteger, MDAlertControllerTransitionStyle) {
-    MDAlertControllerTransitionStyleDefault = 0,
+typedef NS_OPTIONS(long long, MDAlertControllerAnimationOptions) {
+    MDAlertControllerAnimationOptionLayoutSubviews            = 1 <<  0,
+    MDAlertControllerAnimationOptionAllowUserInteraction      = 1 <<  1, // turn on user interaction while animating
+    MDAlertControllerAnimationOptionBeginFromCurrentState     = 1 <<  2, // start all views from current value, not initial value
+    MDAlertControllerAnimationOptionRepeat                    = 1 <<  3, // repeat animation indefinitely
+    MDAlertControllerAnimationOptionAutoreverse               = 1 <<  4, // if repeat, run animation back and forth
+    MDAlertControllerAnimationOptionOverrideInheritedDuration = 1 <<  5, // ignore nested duration
+    MDAlertControllerAnimationOptionOverrideInheritedCurve    = 1 <<  6, // ignore nested curve
+    MDAlertControllerAnimationOptionAllowAnimatedContent      = 1 <<  7, // animate contents (applies to transitions only)
+    MDAlertControllerAnimationOptionShowHideTransitionViews   = 1 <<  8, // flip to/from hidden state instead of adding/removing
+    MDAlertControllerAnimationOptionOverrideInheritedOptions  = 1 <<  9, // do not inherit any options or animation type
 
-    MDAlertControllerTransitionStyleFade,
-    MDAlertControllerTransitionStylePush,
-    MDAlertControllerTransitionStyleReveal,
-    MDAlertControllerTransitionStyleMoveIn,
+    MDAlertControllerAnimationOptionCurveEaseInOut            = 0 << 16, // default
+    MDAlertControllerAnimationOptionCurveEaseIn               = 1 << 16,
+    MDAlertControllerAnimationOptionCurveEaseOut              = 2 << 16,
+    MDAlertControllerAnimationOptionCurveLinear               = 3 << 16,
 
-    MDAlertControllerTransitionStyleCube,
-    MDAlertControllerTransitionStyleFlip,
-    MDAlertControllerTransitionStylePageCurl,
-    MDAlertControllerTransitionStylePageUnCurl,
-    MDAlertControllerTransitionStyleSuckEffect,
-    MDAlertControllerTransitionStyleRippleEffect,
-    MDAlertControllerTransitionStyleCameraIrisHollowOpen,
-    MDAlertControllerTransitionStyleCameraIrisHollowClose,
+    MDAlertControllerAnimationOptionTransitionNone            = 0 << 20, // default
+    MDAlertControllerAnimationOptionTransitionFlipFromLeft    = 1 << 20,
+    MDAlertControllerAnimationOptionTransitionFlipFromRight   = 2 << 20,
+    MDAlertControllerAnimationOptionTransitionCurlUp          = 3 << 20,
+    MDAlertControllerAnimationOptionTransitionCurlDown        = 4 << 20,
+    MDAlertControllerAnimationOptionTransitionCrossDissolve   = 5 << 20,
+    MDAlertControllerAnimationOptionTransitionFlipFromTop     = 6 << 20,
+    MDAlertControllerAnimationOptionTransitionFlipFromBottom  = 7 << 20,
 
-    MDAlertControllerTransitionStyleMaximum = 0xFF,
+    MDAlertControllerAnimationOptionTransitionMoveIn          = 1 << 28,
+    MDAlertControllerAnimationOptionTransitionAlign       = 1 << 29,
 
-    MDAlertControllerTransitionFromLeft  = 1 << 9,
-    MDAlertControllerTransitionFromRight  = 1 << 10,
-    MDAlertControllerTransitionFromTop = 1 << 11,
-    MDAlertControllerTransitionFromBottom = 1 << 12,
+    MDAlertControllerAnimationOptionDirectionFromLeft    = 1 << 32,
+    MDAlertControllerAnimationOptionDirectionFromRight   = 2 << 32,
+    MDAlertControllerAnimationOptionDirectionFromTop     = 3 << 32,
+    MDAlertControllerAnimationOptionDirectionFromBottom  = 4 << 32,
 };
 
 @interface MDAlertController : UIViewController
@@ -139,12 +149,15 @@ typedef NS_ENUM(NSInteger, MDAlertControllerTransitionStyle) {
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
 
 /// Default transition is modal alert or action sheet
-@property (nonatomic, assign) MDAlertControllerTransitionStyle transitionStyle;
+@property (nonatomic, assign) MDAlertControllerAnimationOptions transitionOptions;
 /// Default is .25f;
 @property (nonatomic, assign) NSTimeInterval transitionDuration;
 
 // Default is YES if preferredStyle is MDAlertControllerStyleActionSheet.
-@property (nonatomic, assign) BOOL backgroundTouchabled;
+@property (nonatomic, assign, getter=isBackgroundTouchabled) BOOL backgroundTouchabled;
+
+// Default is NO.
+@property (nonatomic, assign, getter=isOverridable) BOOL overridable;
 
 + (instancetype)alertControllerWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle;
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle NS_DESIGNATED_INITIALIZER;
