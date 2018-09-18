@@ -37,15 +37,15 @@
 @interface _MDAlertControllerTextLabel : UILabel
 @end
 
-@protocol _MDAlertControllerContentView;
+@protocol _MDAlertControllerTransitionView;
 @protocol _MDAlertControllerContentViewDelegate <NSObject>
 
-- (void)contentViewDidCancel:(UIView<_MDAlertControllerContentView> *)contentView;
-- (void)contentView:(UIView<_MDAlertControllerContentView> *)contentView didSelectAction:(MDAlertAction *)action;
+- (void)contentViewDidCancel:(UIView<_MDAlertControllerTransitionView> *)contentView;
+- (void)contentView:(UIView<_MDAlertControllerTransitionView> *)contentView didSelectAction:(MDAlertAction *)action;
 
 @end
 
-@protocol _MDAlertControllerContentView <NSObject>
+@protocol _MDAlertControllerTransitionView <NSObject>
 
 @property (nonatomic, weak) id<_MDAlertControllerContentViewDelegate> delegate;
 
@@ -84,7 +84,7 @@
 
 @end
 
-@interface _MDAlertControllerContentView : UIView <_MDAlertControllerContentView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource>
+@interface _MDAlertControllerTransitionView : UIView <_MDAlertControllerTransitionView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong, readonly) UITableView *tableView;
 @property (nonatomic, strong, readonly) UITapGestureRecognizer *tapGestureRecognizer;
@@ -93,11 +93,11 @@
 
 @end
 
-@interface _MDActionSheetContentView : _MDAlertControllerContentView
+@interface _MDActionSheetTransitionView : _MDAlertControllerTransitionView
 
 @end
 
-@interface _MDAlertContentView : _MDAlertControllerContentView
+@interface _MDAlertTransitionView : _MDAlertControllerTransitionView
 
 @property (nonatomic, strong, readonly) UIView *buttonContentView;
 @property (nonatomic, strong, readonly) UIView *lineView;
@@ -117,7 +117,7 @@
 
 @property (nonatomic, copy, readonly) NSArray<MDAlertAction *> *rowActions;
 
-@property (nonatomic, strong, readonly) UIView<_MDAlertControllerContentView> *contentView;
+@property (nonatomic, strong, readonly) UIView<_MDAlertControllerTransitionView> *transitionView;
 
 @property (nonatomic, strong) MDAlertController *previousAlertController;
 @property (nonatomic, assign) BOOL animating;

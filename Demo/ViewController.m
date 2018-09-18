@@ -83,9 +83,12 @@
     alertController.transitionDuration = arc4random() % 100 / 100. * 0.5 + .15f;
     alertController.welt = arc4random() % 2;
     alertController.overridable = arc4random() % 2;
-    alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
+    alertController.backgroundOverrideOptions = MDAlertControllerBackgroundOptionExclusive;
 
-    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 200, 300)];;
+    alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
+    alertController.contentView.backgroundColor = [UIColor greenColor];
+
+    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];;
     button.backgroundColor = [UIColor colorWithRed:arc4random() % 255 / 255. green:arc4random() % 255 / 255. blue:arc4random() % 255 / 255. alpha:1];
     [button setTitle:@"Button" forState:UIControlStateNormal];
     [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];

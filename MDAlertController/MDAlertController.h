@@ -109,16 +109,25 @@ typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
     MDAlertControllerAnimationOptionDirectionFromBottom  = 4 << 28,
 };
 
+typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
+    MDAlertControllerBackgroundOptionIntegrate,
+    MDAlertControllerBackgroundOptionExclusive,
+};
+
 @interface MDAlertController : UIViewController
 
 @property (nonatomic, assign, readonly) MDAlertControllerStyle preferredStyle;
 
 @property (nonatomic, copy, readonly) NSArray<MDAlertAction *> *actions;
 
+/** The content view in transition view. */
+@property (nonatomic, strong, readonly) UIView *contentView;
+
 @property (nonatomic, strong) MDAlertAction *preferredAction;
 
-/** The custom view in content view. */
+/** The custom view in transition view. */
 @property (nonatomic, strong) UIView *customView;
+
 /** Default is 0x000000, 0.5 */
 @property (nonatomic, strong) UIColor *backgroundColor;
 
@@ -127,10 +136,16 @@ typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, copy) NSString *message;
 
+@property (nonatomic, assign) UIEdgeInsets separatorInset;
+
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
 
-@property (nonatomic, assign) UIEdgeInsets separatorInset;
+/** Default is NO. */
+@property (nonatomic, assign, getter=isOverridable) BOOL overridable;
+
+/** Default is MDAlertControllerBackgroundOptionIntegrate. */
+@property (nonatomic, assign) MDAlertControllerBackgroundOptions backgroundOverrideOptions;
 
 /**
  Default transition is modal alert or action sheet,
@@ -143,9 +158,6 @@ typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
 
 /** Default is YES if preferredStyle is MDAlertControllerStyleActionSheet. */
 @property (nonatomic, assign, getter=isBackgroundTouchabled) BOOL backgroundTouchabled;
-
-/** Default is NO. */
-@property (nonatomic, assign, getter=isOverridable) BOOL overridable;
 
 /** Default is NO to align center. */
 @property (nonatomic, assign, getter=isWelt) BOOL welt;

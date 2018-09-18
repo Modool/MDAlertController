@@ -217,7 +217,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 @end
 
-@implementation _MDAlertControllerContentView
+@implementation _MDAlertControllerTransitionView
 @synthesize delegate, actions = _actions;
 @synthesize preferredAction = _preferredAction, dismissAction = _dismissAction;
 @synthesize titleLabel = _titleLabel, messageLabel = _messageLabel;
@@ -628,7 +628,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 @end
 
-@implementation _MDActionSheetContentView
+@implementation _MDActionSheetTransitionView
 
 #pragma mark - private
 
@@ -733,7 +733,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 @end
 
-@implementation _MDAlertContentView
+@implementation _MDAlertTransitionView
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -1068,7 +1068,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 @end
 
 @implementation MDAlertController
-@synthesize contentView = _contentView, actions = _actions, rowActions = _rowActions;
+@synthesize transitionView = _transitionView, actions = _actions, rowActions = _rowActions;
 @dynamic title;
 
 - (instancetype)init {
@@ -1119,7 +1119,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)loadView {
     [super loadView];
 
-    [self.view addSubview:self.contentView];
+    [self.view addSubview:self.transitionView];
 }
 
 - (void)viewDidLoad {
@@ -1151,14 +1151,18 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [super setTransitioningDelegate:self];
 }
 
-- (UIView<_MDAlertControllerContentView> *)contentView {
-    if (!_contentView) {
+- (UIView *)contentView {
+    return self.transitionView.contentView;
+}
+
+- (UIView<_MDAlertControllerTransitionView> *)transitionView {
+    if (!_transitionView) {
         BOOL actionSheet = self.preferredStyle == MDAlertControllerStyleActionSheet;
 
-        _contentView = actionSheet ? [[_MDActionSheetContentView alloc] init] : [[_MDAlertContentView alloc] init];
-        _contentView.delegate = self;
+        _transitionView = actionSheet ? [[_MDActionSheetTransitionView alloc] init] : [[_MDAlertTransitionView alloc] init];
+        _transitionView.delegate = self;
     }
-    return _contentView;
+    return _transitionView;
 }
 
 - (NSArray<MDAlertAction *> *)actions {
@@ -1194,26 +1198,26 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)setDismissAction:(MDAlertDismissAction *)dismissAction {
-    self.contentView.dismissAction = dismissAction;
+    self.transitionView.dismissAction = dismissAction;
 }
 
 - (MDAlertDismissAction *)dismissAction {
-    return self.contentView.dismissAction;
+    return self.transitionView.dismissAction;
 }
 
 - (void)setCustomView:(UIView *)customView {
-    self.contentView.customView = customView;
+    self.transitionView.customView = customView;
 }
 
 - (UIView *)customView {
-    return self.contentView.customView;
+    return self.transitionView.customView;
 }
 
 - (void)setTitle:(NSString *)title {
     [super setTitle:title];
         
     if ([self isViewLoaded]) {
-        self.contentView.titleLabel.text = title;
+        self.transitionView.titleLabel.text = title;
     }
 }
 
@@ -1222,7 +1226,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         _message = [message copy];
         
         if ([self isViewLoaded]) {
-            self.contentView.messageLabel.text = message;
+            self.transitionView.messageLabel.text = message;
         }
     }
 }
@@ -1241,14 +1245,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     if (_backgroundColor != backgroundColor) {
         _backgroundColor = backgroundColor;
         
-        self.contentView.backgroundView.backgroundColor = backgroundColor;
+        self.transitionView.backgroundView.backgroundColor = backgroundColor;
     }
 }
 
 #pragma mark - private
 
 - (void)_layoutSubViews {
-    self.contentView.frame = self.view.bounds;
+    self.transitionView.frame = self.view.bounds;
 }
 
 - (void)_updateView:(UIView *)view tintColor:(UIColor *)tintColor {
@@ -1260,28 +1264,28 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)_reloadData {
-    self.contentView.welt = self.welt;
-    self.contentView.direction = self.transitionOptions & 0xF0000000;
-    self.contentView.curveOptions = self.transitionOptions & 0xF0000;
+    self.transitionView.welt = self.welt;
+    self.transitionView.direction = self.transitionOptions & 0xF0000000;
+    self.transitionView.curveOptions = self.transitionOptions & 0xF0000;
 
-    self.contentView.frame = self.view.bounds;
-    self.contentView.separatorInset = self.separatorInset;
+    self.transitionView.frame = self.view.bounds;
+    self.transitionView.separatorInset = self.separatorInset;
 
-    self.contentView.titleLabel.text = self.title;
-    self.contentView.messageLabel.text = self.message;
-    self.contentView.backgroundView.backgroundColor = self.backgroundColor;
-    self.contentView.backgroundView.userInteractionEnabled = self.backgroundTouchabled;
+    self.transitionView.titleLabel.text = self.title;
+    self.transitionView.messageLabel.text = self.message;
+    self.transitionView.backgroundView.backgroundColor = self.backgroundColor;
+    self.transitionView.backgroundView.userInteractionEnabled = self.backgroundTouchabled;
     
-    self.contentView.preferredAction = self.preferredAction;
-    self.contentView.actions = self.preferredStyle == MDAlertControllerStyleActionSheet ? self.rowActions : self.actions;
+    self.transitionView.preferredAction = self.preferredAction;
+    self.transitionView.actions = self.preferredStyle == MDAlertControllerStyleActionSheet ? self.rowActions : self.actions;
 
-    [self.contentView reload];
+    [self.transitionView reload];
 }
 
 - (void)_displayAnimated:(BOOL)animated {
     if (!self.beingPresented) return;
 
-    [self.contentView displaying:NO];
+    [self.transitionView displaying:NO];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self _display:YES animated:animated completion:nil];
     });
@@ -1302,14 +1306,15 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     __weak typeof(self) weakParent = parent;
     void (^_completion)(void) = ^{
         __weak typeof(weakSelf) self = weakSelf;
-        self.contentView.hidden = YES;
+        self.transitionView.hidden = YES;
 
         [super dismissViewControllerAnimated:NO completion:^{
             if (completion) completion();
 
             __weak typeof(weakParent) parent = weakParent;
-            parent.contentView.hidden = NO;
-
+            parent.transitionView.hidden = NO;
+            parent.transitionView.backgroundView.hidden = NO;
+            
             [parent _display:YES animated:animated completion:nil];
         }];
     };
@@ -1322,7 +1327,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         if (completion) completion();
         self.animating = NO;
 
-        [self.contentView displaying:displaying];
+        [self.transitionView displaying:displaying];
     };
 
     if (animated && self.transitionOptions && self.preferredStyle != MDAlertControllerStyleActionSheet) {
@@ -1333,10 +1338,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
         if (animation) [animations addObject:animation];
         if (animated && animations.count) {
-            [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:_completion];
+            [self.transitionView display:displaying duration:self.transitionDuration animations:animations completion:_completion];
         } else {
-            [self.contentView displaying:YES];
-            [self.contentView display:displaying animated:animated duration:self.transitionDuration completion:_completion];
+            [self.transitionView displaying:YES];
+            [self.transitionView display:displaying animated:animated duration:self.transitionDuration completion:_completion];
         }
     }
 }
@@ -1346,7 +1351,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     if (additions) {
         [self _transitWithAdditionalOptionsForDisplaying:displaying completion:completion];
     } else {
-        options = [self.contentView systemOptionsWithOptions:options displaying:displaying];
+        options = [self.transitionView systemOptionsWithOptions:options displaying:displaying];
         UIViewAnimationOptions UIOptions = options & 0xFFFFFFF;
 
         [self _transitWithUIOptions:UIOptions displaying:displaying completion:completion];
@@ -1354,20 +1359,20 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)_transitWithAdditionalOptionsForDisplaying:(BOOL)displaying completion:(void (^)(void))completion {
-    CABasicAnimation *positionAnimation = [self.contentView positionAnimationForDisplaying:displaying];
-    CABasicAnimation *alphaAnimation = [self.contentView alphaAnimationForDisplaying:displaying];
+    CABasicAnimation *positionAnimation = [self.transitionView positionAnimationForDisplaying:displaying];
+    CABasicAnimation *alphaAnimation = [self.transitionView alphaAnimationForDisplaying:displaying];
 
     NSArray<CABasicAnimation *> *animations = @[positionAnimation, alphaAnimation];
-    [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:completion];
+    [self.transitionView display:displaying duration:self.transitionDuration animations:animations completion:completion];
 }
 
 - (void)_transitWithUIOptions:(UIViewAnimationOptions)options displaying:(BOOL)displaying completion:(void (^)(void))completion {
-    [UIView transitionWithView:self.contentView.wrapperView duration:self.transitionDuration options:options animations:^{
-        [self.contentView displaying:displaying];
+    [UIView transitionWithView:self.transitionView.wrapperView duration:self.transitionDuration options:options animations:^{
+        [self.transitionView displaying:displaying];
     } completion:^(BOOL finished) {
         if (completion) completion();
     }];
-    self.contentView.hidden = NO;
+    self.transitionView.hidden = NO;
 }
 
 #pragma mark - public
@@ -1377,12 +1382,18 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)presentViewController:(MDAlertController *)viewController animated:(BOOL)animated completion:(void (^)(void))completion {
-    if ([viewController isKindOfClass:[MDAlertController class]] && !self.overridable) {
+    if ([viewController isKindOfClass:[MDAlertController class]]) {
         viewController.previousAlertController =  self;
 
-        [self _display:NO animated:animated completion:^{
-            self.contentView.hidden = YES;
-        }];
+        if (self.overridable) {
+            if (viewController.backgroundOverrideOptions == MDAlertControllerBackgroundOptionExclusive) {
+                self.transitionView.backgroundView.hidden = YES;
+            }
+        } else {
+            [self _display:NO animated:animated completion:^{
+                self.transitionView.hidden = YES;
+            }];
+        }
     }
     [super presentViewController:viewController animated:animated completion:completion];
 }
@@ -1402,11 +1413,11 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 #pragma mark - _MDAlertControllerContentViewDelegate
 
-- (void)contentViewDidCancel:(UIView<_MDAlertControllerContentView> *)contentView {
+- (void)contentViewDidCancel:(UIView<_MDAlertControllerTransitionView> *)contentView {
     [self _dismissAnimated:YES action:nil];
 }
 
-- (void)contentView:(UIView<_MDAlertControllerContentView> *)contentView didSelectAction:(MDAlertAction *)action {
+- (void)contentView:(UIView<_MDAlertControllerTransitionView> *)contentView didSelectAction:(MDAlertAction *)action {
     [self _dismissAnimated:YES action:action];
 }
 
