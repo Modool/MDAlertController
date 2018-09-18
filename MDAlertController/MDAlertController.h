@@ -8,14 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-//! Project version number for MDAlertController.
-FOUNDATION_EXPORT double MDAlertControllerVersionNumber;
-
-//! Project version string for MDAlertController.
-FOUNDATION_EXPORT const unsigned char MDAlertControllerVersionString[];
-
-// In this header, you should import all the public headers of your framework using statements like #import <MDAlertController/PublicHeader.h>
-
 typedef NS_ENUM(NSUInteger, MDAlertActionStyle) {
     MDAlertActionStyleDefault = 0,
     MDAlertActionStyleCancel,
@@ -71,7 +63,7 @@ typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
 
 @property (nonatomic, assign, readonly) MDAlertActionPosition position;
 
-/// Default is 'sizeToFit'.
+/** Default is 'sizeToFit'. */
 @property (nonatomic, assign) CGSize size;
 
 @property (nonatomic, strong) UIImage *selectedImage NS_UNAVAILABLE;
@@ -92,7 +84,7 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
     MDAlertControllerStyleAlert
 };
 
-typedef NS_OPTIONS(long long, MDAlertControllerAnimationOptions) {
+typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
     MDAlertControllerAnimationOptionLayoutSubviews            = 1 <<  0,
     MDAlertControllerAnimationOptionAllowUserInteraction      = 1 <<  1, // turn on user interaction while animating
     MDAlertControllerAnimationOptionBeginFromCurrentState     = 1 <<  2, // start all views from current value, not initial value
@@ -118,13 +110,12 @@ typedef NS_OPTIONS(long long, MDAlertControllerAnimationOptions) {
     MDAlertControllerAnimationOptionTransitionFlipFromTop     = 6 << 20,
     MDAlertControllerAnimationOptionTransitionFlipFromBottom  = 7 << 20,
 
-    MDAlertControllerAnimationOptionTransitionMoveIn          = 1 << 28,
-    MDAlertControllerAnimationOptionTransitionAlign       = 1 << 29,
+    MDAlertControllerAnimationOptionTransitionMoveIn     = 1 << 24,
 
-    MDAlertControllerAnimationOptionDirectionFromLeft    = 1 << 32,
-    MDAlertControllerAnimationOptionDirectionFromRight   = 2 << 32,
-    MDAlertControllerAnimationOptionDirectionFromTop     = 3 << 32,
-    MDAlertControllerAnimationOptionDirectionFromBottom  = 4 << 32,
+    MDAlertControllerAnimationOptionDirectionFromLeft    = 1 << 28,
+    MDAlertControllerAnimationOptionDirectionFromRight   = 2 << 28,
+    MDAlertControllerAnimationOptionDirectionFromTop     = 3 << 28,
+    MDAlertControllerAnimationOptionDirectionFromBottom  = 4 << 28,
 };
 
 @interface MDAlertController : UIViewController
@@ -135,9 +126,9 @@ typedef NS_OPTIONS(long long, MDAlertControllerAnimationOptions) {
 
 @property (nonatomic, strong) MDAlertAction *preferredAction;
 
-// The custom view in content view.
+/** The custom view in content view. */
 @property (nonatomic, strong) UIView *customView;
-// Default is 0x000000, 0.5
+/** Default is 0x000000, 0.5 */
 @property (nonatomic, strong) UIColor *backgroundColor;
 
 @property (nonatomic, strong) UIColor *tintColor;
@@ -148,16 +139,23 @@ typedef NS_OPTIONS(long long, MDAlertControllerAnimationOptions) {
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
 
-/// Default transition is modal alert or action sheet
+/**
+ Default transition is modal alert or action sheet,
+ disabled if style is MDAlertControllerStyleActionSheet.
+ */
 @property (nonatomic, assign) MDAlertControllerAnimationOptions transitionOptions;
-/// Default is .25f;
+
+/** Default is .25f, disabled if style is MDAlertControllerStyleActionSheet. */
 @property (nonatomic, assign) NSTimeInterval transitionDuration;
 
-// Default is YES if preferredStyle is MDAlertControllerStyleActionSheet.
+/** Default is YES if preferredStyle is MDAlertControllerStyleActionSheet. */
 @property (nonatomic, assign, getter=isBackgroundTouchabled) BOOL backgroundTouchabled;
 
-// Default is NO.
+/** Default is NO. */
 @property (nonatomic, assign, getter=isOverridable) BOOL overridable;
+
+/** Default is NO to align center. */
+@property (nonatomic, assign, getter=isWelt) BOOL welt;
 
 + (instancetype)alertControllerWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle;
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle NS_DESIGNATED_INITIALIZER;

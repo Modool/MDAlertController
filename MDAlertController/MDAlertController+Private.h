@@ -59,6 +59,9 @@
 
 @property (nonatomic, strong) UIView *customView;
 
+@property (nonatomic, assign, getter=isWelt) BOOL welt;
+@property (nonatomic, assign) MDAlertControllerAnimationOptions direction;
+
 @property (nonatomic, strong, readonly) UIButton *dismissButton;
 @property (nonatomic, strong, readonly) UIView *wrapperView;
 @property (nonatomic, strong, readonly) UIView *contentView;
@@ -68,9 +71,9 @@
 
 @property (nonatomic, strong, readonly) UIColor *tintColor;
 
-- (MDAlertControllerAnimationOptions)optionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying;
-- (CAAnimation *)alphaAnimationForDisplaying:(BOOL)displaying;
-- (CAAnimation *)positionAnimationForDisplaying:(BOOL)displaying direction:(MDAlertControllerAnimationOptions)direction center:(BOOL)center;
+- (MDAlertControllerAnimationOptions)systemOptionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying;
+- (CABasicAnimation *)alphaAnimationForDisplaying:(BOOL)displaying;
+- (CABasicAnimation *)positionAnimationForDisplaying:(BOOL)displaying;
 
 - (void)reload;
 
@@ -115,6 +118,7 @@
 @property (nonatomic, strong, readonly) UIView<_MDAlertControllerContentView> *contentView;
 
 @property (nonatomic, strong) MDAlertController *previousAlertController;
+@property (nonatomic, assign) BOOL animating;
 
 @end
 

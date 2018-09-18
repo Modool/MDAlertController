@@ -19,34 +19,8 @@ const CGFloat MDAlertControllerDismissAnimationDuration = 0.15f;
 const CGFloat MDAlertControllerRowHeight = 50.f;
 const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 
-@interface _MDAlertControllerAnimation : CAAnimationGroup <CAAnimationDelegate> {
-@private
-    void (^_completion)(void);
-}
-
-@end
-
-@implementation _MDAlertControllerAnimation
-
-+ (instancetype)aninmationWithAnimations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion {
-    _MDAlertControllerAnimation *animation = [self animation];
-    animation.delegate = animation;
-
-    animation.removedOnCompletion = NO;
-    animation.fillMode = kCAFillModeBoth;
-    animation.animations = [animations copy];
-    animation->_completion = [completion copy];
-
-    return animation;
-}
-
-#pragma mark - CAAnimationDelegate
-
-- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
-    if (_completion) _completion();
-}
-
-@end
+NSString *const MDAlertControllerWrapperAnimationKey = @"wrapper.view.animation.key";
+NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.animation.opacity.key";
 
 @implementation _MDAlertControllerCell
 
@@ -189,6 +163,13 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     return self;
 }
 
+- (void)layoutSubviews {
+    [super layoutSubviews];
+
+    CGRect bounds = self.bounds;
+    self.titleLabel.frame = (CGRect){0, 5, bounds.size.width, bounds.size.height - 5};
+}
+
 - (void)tintColorDidChange {
     [super tintColorDidChange];
     
@@ -252,6 +233,7 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 @synthesize titleLabel = _titleLabel, messageLabel = _messageLabel;
 @synthesize backgroundView = _backgroundView, wrapperView = _wrapperView, contentView = _contentView;
 @synthesize customView = _customView, dismissButton = _dismissButton;
+@synthesize welt = _welt, direction = _direction;
 
 @dynamic tintColor;
 
@@ -447,36 +429,20 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
 
     animation.duration = duration;
+
     animation.removedOnCompletion = NO;
-    animation.fillMode = kCAFillModeBoth;
+    animation.fillMode = kCAFillModeForwards;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
 
     return animation;
 }
 
-- (CATransition *)_defaultTransitionForDisplaying:(BOOL)displaying {
-    NSString *functionName = displaying ? kCAMediaTimingFunctionEaseOut : kCAMediaTimingFunctionEaseIn;
-
-    CATransition *animation = [CATransition animation];
-
-    animation.removedOnCompletion = NO;
-    animation.fillMode = kCAFillModeBoth;
-
-    animation.startProgress = displaying ? 0.f : 1.f;
-    animation.endProgress = displaying ? 1.f : 0.f;
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
-
-    return animation;
-}
-
-- (MDAlertControllerAnimationOptions)_optionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying {
+- (MDAlertControllerAnimationOptions)_systemOptionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying {
     if (displaying) return options;
 
     MDAlertControllerAnimationOptions animationOptions = options & 0xFFFF;
     MDAlertControllerAnimationOptions curveOption = options & 0xF0000;
     MDAlertControllerAnimationOptions transtionOptions = options & 0xF00000;
-    MDAlertControllerAnimationOptions addtionalOptions = options & 0xF0000000;
-    MDAlertControllerAnimationOptions direction = options & 0xF00000000;
 
     if (curveOption) {
         if (curveOption == MDAlertControllerAnimationOptionCurveEaseIn) {
@@ -500,14 +466,20 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
             transtionOptions = MDAlertControllerAnimationOptionTransitionCurlUp;
         }
     }
-    return animationOptions | curveOption | transtionOptions | addtionalOptions | direction;
+    return animationOptions | curveOption | transtionOptions;
 }
 
-- (void)_addAnimations:(NSArray<CAAnimation *> *)animations backgroundAnimation:(CAAnimation *)backgroundAnimation {
-    for (CAAnimation *animation in animations) {
-        [self.wrapperView.layer addAnimation:animation forKey:[NSString stringWithFormat:@"wrapper.view.animation.key#%ld", (long)animation]];
+- (void)_addAnimations:(NSArray<CAAnimation *> *)animations backgroundAnimation:(CABasicAnimation *)backgroundAnimation {
+    CAAnimation *animation = animations.firstObject;
+    if (animations.count >= 2) {
+        CAAnimationGroup *group = [CAAnimationGroup animation];
+        group.animations = animations;
+
+        animation = group;
     }
-    [self.backgroundView.layer addAnimation:backgroundAnimation forKey:@"background.view.animation.opacity.key"];
+
+    [self.wrapperView.layer addAnimation:animation forKey:MDAlertControllerWrapperAnimationKey];
+    [self.backgroundView.layer addAnimation:backgroundAnimation forKey:MDAlertControllerBackgroundAnimationKey];
 
     self.backgroundView.hidden = NO;
     self.wrapperView.hidden = NO;
@@ -515,7 +487,7 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 
 - (void)_display:(BOOL)displaying duration:(CGFloat)duration animations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion {
     if (animations.count) {
-        CAAnimation *backgroundAnimation = [self alphaAnimationForDisplaying:displaying];
+        CABasicAnimation *backgroundAnimation = [self alphaAnimationForDisplaying:displaying];
         backgroundAnimation.duration = duration;
         backgroundAnimation.delegate = self;
 
@@ -530,11 +502,17 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 
 #pragma mark - CAAnimationDelegate
 
-- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)flag {
+- (void)animationDidStop:(CABasicAnimation *)animation finished:(BOOL)flag {
     self.userInteractionEnabled = YES;
     
     if (self.animatedCompletion) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), self.animatedCompletion);
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) self = weakSelf;
+            self.animatedCompletion();
+
+            [self.wrapperView.layer removeAllAnimations];
+        });
     }
 }
 
@@ -550,16 +528,16 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 }
 
 - (void)display:(BOOL)displaying duration:(CGFloat)duration animations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion {
-    for (CAAnimation *animation in animations) animation.duration = duration;
+    for (CABasicAnimation *animation in animations) animation.duration = duration;
 
     [self _display:displaying duration:duration animations:animations completion:completion];
 }
 
-- (MDAlertControllerAnimationOptions)optionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying {
-    return [self _optionsWithOptions:options displaying:displaying];
+- (MDAlertControllerAnimationOptions)systemOptionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying {
+    return [self _systemOptionsWithOptions:options displaying:displaying];
 }
 
-- (CAAnimation *)alphaAnimationForDisplaying:(BOOL)displaying {
+- (CABasicAnimation *)alphaAnimationForDisplaying:(BOOL)displaying {
     CABasicAnimation *animation = [self _defaultAnimationWithKeyPath:@"opacity" displaying:displaying];
     animation.fromValue = @(displaying ? 0.f : 1.f);
     animation.toValue = @(displaying ? 1.f : 0.f);
@@ -567,9 +545,9 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     return animation;
 }
 
-- (CAAnimation *)positionAnimationForDisplaying:(BOOL)displaying direction:(MDAlertControllerAnimationOptions)direction center:(BOOL)center {
-    BOOL vertical = direction == MDAlertControllerAnimationOptionDirectionFromTop || direction == MDAlertControllerAnimationOptionDirectionFromBottom;
-    BOOL reverse = direction == MDAlertControllerAnimationOptionDirectionFromRight || direction == MDAlertControllerAnimationOptionDirectionFromBottom;
+- (CABasicAnimation *)positionAnimationForDisplaying:(BOOL)displaying {
+    BOOL vertical = self.direction == MDAlertControllerAnimationOptionDirectionFromTop || self.direction == MDAlertControllerAnimationOptionDirectionFromBottom;
+    BOOL reverse = self.direction == MDAlertControllerAnimationOptionDirectionFromRight || self.direction == MDAlertControllerAnimationOptionDirectionFromBottom;
 
     NSString *keyPath = vertical ? @"position.y" : @"position.x";
     CABasicAnimation *animation = [self _defaultAnimationWithKeyPath:keyPath displaying:displaying];
@@ -585,7 +563,7 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     CGFloat contentSize = vertical ? contentHeight : contentWidth;
 
     CGFloat fromValue = contentSize / 2. * (reverse ? 1 : -1) + size * (reverse ? 1 : 0);
-    CGFloat toValue = center ? (size * 1 / 2.) : (size * (reverse ? 1 : 0) + contentSize / 2. * (reverse ? -1 : 1));
+    CGFloat toValue = self.welt ? (size * (reverse ? 1 : 0) + contentSize / 2. * (reverse ? -1 : 1)) : (size * 1 / 2.);
 
     if (!displaying) {
         CGFloat tmp = fromValue;
@@ -670,12 +648,14 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     CGFloat tableViewHeight = MIN(height - customViewSize.height - titleHeight - messageHeight, expectTableHeight);;
 
     CGFloat contentHeight = customViewSize.height + titleHeight + messageHeight + tableViewHeight;
-    CGFloat contentY = height - contentHeight;
-    CGSize contentSize = CGSizeMake(contentWidth, contentHeight);
 
-    self.wrapperView.frame = (CGRect){0, contentY, contentSize};
+    BOOL welt = self.welt;
+    BOOL top = self.direction == MDAlertControllerAnimationOptionDirectionFromTop;
+    CGFloat contentY = welt ? (top ? 0 : height - contentHeight) : (height - contentHeight) / 2.f;
 
-    self.contentView.frame = (CGRect){0, 0, contentSize};
+    self.wrapperView.frame = (CGRect){0, contentY, contentWidth, contentHeight};
+
+    self.contentView.frame = (CGRect){0, 0, contentWidth, contentHeight};
 
     CGFloat offsetY = 0;
     self.titleLabel.frame = (CGRect){0, offsetY, contentWidth, titleHeight};
@@ -710,14 +690,15 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     [self.actions enumerateObjectsUsingBlock:^(MDAlertAction *action, NSUInteger index, BOOL *stop) {
         if (!action.selected) return;
 
-        [self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+        [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
     }];
 }
 
 - (void)display:(BOOL)displaying animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion {
-    CAAnimation *animation = nil;
+    CABasicAnimation *animation = nil;
     if (animated) {
-        animation = [self positionAnimationForDisplaying:displaying direction:MDAlertControllerAnimationOptionDirectionFromBottom center:NO];
+        animation = [self positionAnimationForDisplaying:displaying];
         animation.duration = duration;
     }
     [self display:displaying duration:duration animations:@[animation] completion:completion];
@@ -785,8 +766,17 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 
     CGFloat contentHeight = headerHeight + actionContentHeight;
 
-    CGFloat contentX = (width - contentWidth) / 2.f;
-    CGFloat contentY = (height - contentHeight) / 2.f;
+    BOOL welt = self.welt;
+    BOOL vertical = self.direction == MDAlertControllerAnimationOptionDirectionFromTop || self.direction == MDAlertControllerAnimationOptionDirectionFromBottom;
+    BOOL reverse = self.direction == MDAlertControllerAnimationOptionDirectionFromRight || self.direction == MDAlertControllerAnimationOptionDirectionFromBottom;
+
+    CGFloat size = vertical ? height : width;
+    CGFloat contentSize = vertical ? contentHeight : contentWidth;
+
+    CGFloat value = welt ? (size * (reverse ? 1 : 0) + contentSize * (reverse ? -1 : 0)) : ((size - contentSize) * 1 / 2.);
+
+    CGFloat contentX = vertical ? (width - contentWidth) / 2.f : value;
+    CGFloat contentY = vertical ? value : (height - contentHeight) / 2.f;
 
     self.wrapperView.frame = (CGRect){contentX, contentY, contentWidth, contentHeight};
 
@@ -884,7 +874,7 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
     }];
 }
 
-- (CAAnimation *)_scaleAnimationForDisplaying:(BOOL)displaying {
+- (CABasicAnimation *)_scaleAnimationForDisplaying:(BOOL)displaying {
     CABasicAnimation *animation = [self _defaultAnimationWithKeyPath:@"transform.scale" displaying:displaying];
 
     animation.fromValue = @(displaying ? 0.5f : 1.f);
@@ -917,10 +907,10 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 }
 
 - (void)display:(BOOL)displaying animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion {
-    NSArray<CAAnimation *> *animations = nil;
+    NSArray<CABasicAnimation *> *animations = nil;
     if (animated) {
-        CAAnimation *scaleAnimation = [self _scaleAnimationForDisplaying:displaying];
-        CAAnimation *alphaAnimation = [self alphaAnimationForDisplaying:displaying];
+        CABasicAnimation *scaleAnimation = [self _scaleAnimationForDisplaying:displaying];
+        CABasicAnimation *alphaAnimation = [self alphaAnimationForDisplaying:displaying];
         
         animations = @[scaleAnimation, alphaAnimation];
     }
@@ -1060,6 +1050,9 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
         self.backgroundColor = HEXACOLOR(0x000000, 0.5);
         self.backgroundTouchabled = preferredStyle == MDAlertControllerStyleActionSheet;
 
+        self.welt = preferredStyle == MDAlertControllerStyleActionSheet;;
+        self.transitionOptions = preferredStyle == MDAlertControllerStyleActionSheet ? MDAlertControllerAnimationOptionDirectionFromBottom : 0;
+
         self.transitioningDelegate = self;
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
@@ -1096,7 +1089,7 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
 
-    [self _layoutSubViews];
+    if (!_animating) [self _layoutSubViews];
 }
 
 #pragma mark - accessor
@@ -1210,7 +1203,11 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 }
 
 - (void)_reloadData {
+    self.contentView.welt = self.welt;
+    self.contentView.direction = self.transitionOptions & 0xF0000000;
+
     self.contentView.frame = self.view.bounds;
+
     self.contentView.titleLabel.text = self.title;
     self.contentView.messageLabel.text = self.message;
 
@@ -1255,41 +1252,43 @@ const CGFloat MDAlertControllerDestructiveFooterViewHeight = 60.f;
 }
 
 - (void)_display:(BOOL)displaying animated:(BOOL)animated completion:(void (^)(void))completion {
-    if (animated && self.transitionOptions) {
-        [self _transitWithOptions:self.transitionOptions displaying:displaying completion:completion];
+    self.animating = YES;
+    void (^_completion)(void) = ^{
+        if (completion) completion();
+        self.animating = NO;
+    };
+    if (animated && self.transitionOptions && self.preferredStyle != MDAlertControllerStyleActionSheet) {
+        [self _transitWithOptions:self.transitionOptions displaying:displaying completion:_completion];
     } else {
         NSMutableArray<CAAnimation *> *animations = [NSMutableArray array];
         CAAnimation *animation = displaying ? self.presentingAnimation : self.dismissingAnimation;
 
         if (animation) [animations addObject:animation];
         if (animated && animations.count) {
-            [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:completion];
+            [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:_completion];
         } else {
-            [self.contentView display:displaying animated:animated duration:self.transitionDuration completion:completion];
+            [self.contentView display:displaying animated:animated duration:self.transitionDuration completion:_completion];
         }
     }
 }
 
 - (void)_transitWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying completion:(void (^)(void))completion {
-    options = [self.contentView optionsWithOptions:options displaying:displaying];
-    MDAlertControllerAnimationOptions additions = options & 0xF0000000;
-    MDAlertControllerAnimationOptions direction = options & 0xF00000000;
-
+    MDAlertControllerAnimationOptions additions = options & 0xF000000;
     if (additions) {
-        [self _transitWithAdditionalOptions:additions direction:direction displaying:displaying completion:completion];
+        [self _transitWithAdditionalOptionsForDisplaying:displaying completion:completion];
     } else {
+        options = [self.contentView systemOptionsWithOptions:options displaying:displaying];
         UIViewAnimationOptions UIOptions = options & 0xFFFFFFF;
+
         [self _transitWithUIOptions:UIOptions displaying:displaying completion:completion];
     }
 }
 
-- (void)_transitWithAdditionalOptions:(MDAlertControllerAnimationOptions)options direction:(MDAlertControllerAnimationOptions)direction displaying:(BOOL)displaying completion:(void (^)(void))completion {
-    BOOL center = options & MDAlertControllerAnimationOptionTransitionMoveIn;
+- (void)_transitWithAdditionalOptionsForDisplaying:(BOOL)displaying completion:(void (^)(void))completion {
+    CABasicAnimation *positionAnimation = [self.contentView positionAnimationForDisplaying:displaying];
+    CABasicAnimation *alphaAnimation = [self.contentView alphaAnimationForDisplaying:displaying];
 
-    CAAnimation *positionAnimation = [self.contentView positionAnimationForDisplaying:displaying direction:direction center:center];
-    CAAnimation *alphaAnimation = [self.contentView alphaAnimationForDisplaying:displaying];
-
-    NSArray<CAAnimation *> *animations = @[positionAnimation, alphaAnimation];
+    NSArray<CABasicAnimation *> *animations = @[positionAnimation, alphaAnimation];
     [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:completion];
 }
 
