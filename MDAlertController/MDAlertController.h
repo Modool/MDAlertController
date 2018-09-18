@@ -85,17 +85,6 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerStyle) {
 };
 
 typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
-    MDAlertControllerAnimationOptionLayoutSubviews            = 1 <<  0,
-    MDAlertControllerAnimationOptionAllowUserInteraction      = 1 <<  1, // turn on user interaction while animating
-    MDAlertControllerAnimationOptionBeginFromCurrentState     = 1 <<  2, // start all views from current value, not initial value
-    MDAlertControllerAnimationOptionRepeat                    = 1 <<  3, // repeat animation indefinitely
-    MDAlertControllerAnimationOptionAutoreverse               = 1 <<  4, // if repeat, run animation back and forth
-    MDAlertControllerAnimationOptionOverrideInheritedDuration = 1 <<  5, // ignore nested duration
-    MDAlertControllerAnimationOptionOverrideInheritedCurve    = 1 <<  6, // ignore nested curve
-    MDAlertControllerAnimationOptionAllowAnimatedContent      = 1 <<  7, // animate contents (applies to transitions only)
-    MDAlertControllerAnimationOptionShowHideTransitionViews   = 1 <<  8, // flip to/from hidden state instead of adding/removing
-    MDAlertControllerAnimationOptionOverrideInheritedOptions  = 1 <<  9, // do not inherit any options or animation type
-
     MDAlertControllerAnimationOptionCurveEaseInOut            = 0 << 16, // default
     MDAlertControllerAnimationOptionCurveEaseIn               = 1 << 16,
     MDAlertControllerAnimationOptionCurveEaseOut              = 2 << 16,

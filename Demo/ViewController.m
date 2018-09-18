@@ -61,9 +61,16 @@
     MDAlertController *alertController = [[MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style] actionNamed:@"确定"];
     alertController.backgroundTouchabled = YES;
 
-    MDAlertControllerAnimationOptions direction = (arc4random() % 4 + 1) << 28;
-    alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | direction;
-    alertController.transitionDuration = .15f;
+    BOOL valid = arc4random() % 2;
+    if (valid) {
+        MDAlertControllerAnimationOptions direction = (arc4random() % 4 + 1) << 28;
+        alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | direction;
+    } else {
+        MDAlertControllerAnimationOptions options = (arc4random() % 8) << 20;
+        alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | options;
+    }
+
+    alertController.transitionDuration = arc4random() % 100 / 100. * 3 + .15f;
     alertController.welt = arc4random() % 2;
     alertController.overridable = arc4random() % 2;
 

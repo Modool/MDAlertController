@@ -61,6 +61,7 @@
 
 @property (nonatomic, assign, getter=isWelt) BOOL welt;
 @property (nonatomic, assign) MDAlertControllerAnimationOptions direction;
+@property (nonatomic, assign) MDAlertControllerAnimationOptions curveOptions;
 
 @property (nonatomic, strong, readonly) UIButton *dismissButton;
 @property (nonatomic, strong, readonly) UIView *wrapperView;

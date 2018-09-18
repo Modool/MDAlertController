@@ -233,7 +233,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 @synthesize titleLabel = _titleLabel, messageLabel = _messageLabel;
 @synthesize backgroundView = _backgroundView, wrapperView = _wrapperView, contentView = _contentView;
 @synthesize customView = _customView, dismissButton = _dismissButton;
-@synthesize welt = _welt, direction = _direction;
+@synthesize welt = _welt, direction = _direction, curveOptions = _curveOptions;
 
 @dynamic tintColor;
 
@@ -423,8 +423,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (CABasicAnimation *)_defaultAnimationWithKeyPath:(NSString *)keyPath displaying:(BOOL)displaying {
+    MDAlertControllerAnimationOptions curveOptions = [self _systemOptionsWithOptions:self.curveOptions displaying:displaying];
+
     CGFloat duration = displaying ? MDAlertControllerPresentAnimationDuration : MDAlertControllerDismissAnimationDuration;
-    NSString *functionName = displaying ? kCAMediaTimingFunctionEaseOut : kCAMediaTimingFunctionEaseIn;
+    NSString *functionName = [self _fuctionNameWithCurveOptions:curveOptions];
 
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
 
@@ -435,6 +437,15 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     animation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
 
     return animation;
+}
+
+- (NSString *)_fuctionNameWithCurveOptions:(MDAlertControllerAnimationOptions)curveOptions {
+    switch (curveOptions) {
+        case MDAlertControllerAnimationOptionCurveEaseIn: return kCAMediaTimingFunctionEaseIn;
+        case MDAlertControllerAnimationOptionCurveEaseOut: return kCAMediaTimingFunctionEaseOut;
+        case MDAlertControllerAnimationOptionCurveLinear: return kCAMediaTimingFunctionLinear;
+        default: return kCAMediaTimingFunctionEaseInEaseOut;
+    }
 }
 
 - (MDAlertControllerAnimationOptions)_systemOptionsWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying {
@@ -1051,7 +1062,13 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         self.backgroundTouchabled = preferredStyle == MDAlertControllerStyleActionSheet;
 
         self.welt = preferredStyle == MDAlertControllerStyleActionSheet;;
-        self.transitionOptions = preferredStyle == MDAlertControllerStyleActionSheet ? MDAlertControllerAnimationOptionDirectionFromBottom : 0;
+
+        MDAlertControllerAnimationOptions options = MDAlertControllerAnimationOptionCurveEaseIn;
+        if (preferredStyle == MDAlertControllerStyleActionSheet) {
+            options |= MDAlertControllerAnimationOptionDirectionFromBottom;
+        }
+
+        self.transitionOptions = options;
 
         self.transitioningDelegate = self;
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
@@ -1205,6 +1222,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)_reloadData {
     self.contentView.welt = self.welt;
     self.contentView.direction = self.transitionOptions & 0xF0000000;
+    self.contentView.curveOptions = self.transitionOptions & 0xF0000;
 
     self.contentView.frame = self.view.bounds;
 
