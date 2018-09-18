@@ -17,6 +17,7 @@
 		08AD79FE2062B5D4004122D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08AD79FD2062B5D4004122D2 /* Assets.xcassets */; };
 		08AD7A012062B5D4004122D2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 08AD79FF2062B5D4004122D2 /* LaunchScreen.storyboard */; };
 		08AD7A042062B5D5004122D2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 08AD7A032062B5D5004122D2 /* main.m */; };
+		08FBB7512150CCB800E6A904 /* MDAlertController.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 08AD79CB2062A83B004122D2 /* MDAlertController.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,19 @@
 			remoteInfo = MDAlertController;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		08FBB7502150CCB000E6A904 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				08FBB7512150CCB800E6A904 /* MDAlertController.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		08AD79CB2062A83B004122D2 /* MDAlertController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MDAlertController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -152,6 +166,7 @@
 				08AD79EE2062B5D4004122D2 /* Sources */,
 				08AD79EF2062B5D4004122D2 /* Frameworks */,
 				08AD79F02062B5D4004122D2 /* Resources */,
+				08FBB7502150CCB000E6A904 /* CopyFiles */,
 			);
 			buildRules = (
 			);
