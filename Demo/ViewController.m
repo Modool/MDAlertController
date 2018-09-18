@@ -36,7 +36,10 @@
 @end
 
 @interface ViewController ()
+
 @property (weak, nonatomic) IBOutlet UIButton *button;
+
+@property (strong, nonatomic) UIViewController *presented;
 
 @end
 
@@ -47,57 +50,41 @@
     // Do any additional setup after loading the view, typically from a nib.
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+    self.presented = nil;
+}
+
+- (void)presentAlert:(UIViewController *)viewController {
+    MDAlertControllerStyle style = arc4random() % 2;
+    MDAlertController *alertController = [[MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style] actionNamed:@"确定"];
+    alertController.backgroundTouchabled = YES;
+
+    MDAlertControllerAnimationOptions direction = (arc4random() % 4 + 1) << 28;
+    alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | direction;
+    alertController.transitionDuration = .15f;
+    alertController.welt = arc4random() % 2;
+    alertController.overridable = arc4random() % 2;
+
+    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
+    button.backgroundColor = [UIColor colorWithRed:arc4random() % 255 / 255. green:arc4random() % 255 / 255. blue:arc4random() % 255 / 255. alpha:1];
+    [button setTitle:@"Button" forState:UIControlStateNormal];
+    [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
+    [button addTarget:self action:@selector(didClickCustomButton:) forControlEvents:UIControlEventTouchUpInside];
+
+    alertController.customView = button;
+
+    [viewController presentViewController:alertController animated:YES completion:nil];
+    self.presented = alertController;
 }
 
 - (IBAction)didClickAlert:(id)sender{
-//    MDAlertController *alertController = [[[MDAlertController alertNamed:@"name" message:@"message"] actionNamed:@"确认"] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
-//    MDAlertController *alertController = [[[MDAlertController alertNamed:nil message:nil] actionNamed:@"确定"] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
-//    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"确定"];
-//    MDAlertController *alertController = [[MDAlertController alertNamed:nil message:nil] actionNamed:@"取消" style:MDAlertActionStyleDestructive];
-    MDAlertController *alertController = [MDAlertController alertNamed:nil message:nil];
-    alertController.backgroundTouchabled = YES;
+    [self presentAlert:self];
+}
 
-    alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | MDAlertControllerAnimationOptionDirectionFromRight;
-    alertController.transitionDuration = .15f;
-
-    alertController.tintColor = [UIColor redColor];
-    alertController.backgroundColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5];
-    alertController.overridable = YES;
-    alertController.welt = YES;
-
-    UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
-    customView.backgroundColor = [UIColor redColor];
-    alertController.customView = customView;
-
-//    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-//    animation.fromValue = @(0);
-//    animation.toValue = @(2 * M_PI);
-//    animation.repeatCount = 3;
-//    animation.duration = 0.25;
-
-//    alertController.dismissingAnimation = animation;
-
-    [self presentViewController:alertController animated:YES completion:nil];
-
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        MDAlertController *alertController2 = [MDAlertController alertNamed:nil message:nil];
-        alertController2.backgroundTouchabled = YES;
-
-        alertController2.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | MDAlertControllerAnimationOptionTransitionMoveIn | MDAlertControllerAnimationOptionDirectionFromBottom;
-        alertController2.transitionDuration = .15f;
-
-        alertController2.tintColor = [UIColor blueColor];
-        alertController2.backgroundColor = [UIColor colorWithRed:1 green:0 blue:0 alpha:0.5];
-
-        UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
-        customView.backgroundColor = [UIColor blueColor];
-        alertController2.customView = customView;
-
-        [alertController presentViewController:alertController2 animated:YES completion:nil];
-    });
+- (IBAction)didClickCustomButton:(id)sender{
+    [self presentAlert:self.presented];
 }
 
 - (IBAction)didClickActionSheet:(id)sender{
