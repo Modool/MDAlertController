@@ -58,7 +58,17 @@
 
 - (void)presentAlert:(UIViewController *)viewController {
     MDAlertControllerStyle style = arc4random() % 2;
-    MDAlertController *alertController = [[MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style] actionNamed:@"确定"];
+    MDAlertController *alertController = [MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style];
+    MDAlertAction *action = [MDAlertAction actionWithTitle:@"哈哈哈" style:MDAlertActionStyleDefault handler:nil];
+    action.titleAlignment = NSTextAlignmentCenter;
+    [alertController addAction:action];
+
+    action = [MDAlertAction actionWithTitle:@"确定" style:MDAlertActionStyleDefault handler:nil];
+    [alertController addAction:action];
+
+    action = [MDAlertAction actionWithTitle:@"取消" style:MDAlertActionStyleDestructive handler:nil];
+    [alertController addAction:action];
+    
     alertController.backgroundTouchabled = YES;
 
     BOOL valid = arc4random() % 2;
@@ -70,11 +80,12 @@
         alertController.transitionOptions = MDAlertControllerAnimationOptionCurveEaseIn | options;
     }
 
-    alertController.transitionDuration = arc4random() % 100 / 100. * 3 + .15f;
+    alertController.transitionDuration = arc4random() % 100 / 100. * 0.5 + .15f;
     alertController.welt = arc4random() % 2;
     alertController.overridable = arc4random() % 2;
+    alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
 
-    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 300, 200)];;
+    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 200, 300)];;
     button.backgroundColor = [UIColor colorWithRed:arc4random() % 255 / 255. green:arc4random() % 255 / 255. blue:arc4random() % 255 / 255. alpha:1];
     [button setTitle:@"Button" forState:UIControlStateNormal];
     [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];

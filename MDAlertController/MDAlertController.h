@@ -46,7 +46,6 @@ typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
 @property (nonatomic, copy, readonly) NSString *title;
 
 @property (nonatomic, strong, readonly) UIImage *image;
-
 @property (nonatomic, strong) UIImage *selectedImage;
 
 @property (nonatomic, assign, getter=isEnabled) BOOL enabled;
@@ -54,6 +53,9 @@ typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
 
 @property (nonatomic, strong) UIFont *font;
 @property (nonatomic, strong) UIColor *color;
+
+/** Default is left, disabled for alert. */
+@property (nonatomic, assign) NSTextAlignment titleAlignment;
 
 @property (nonatomic, strong) UIColor *backgroundColor;
 
@@ -127,6 +129,8 @@ typedef NS_OPTIONS(unsigned long long, MDAlertControllerAnimationOptions) {
 
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
+
+@property (nonatomic, assign) UIEdgeInsets separatorInset;
 
 /**
  Default transition is modal alert or action sheet,

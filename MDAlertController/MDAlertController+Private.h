@@ -16,8 +16,6 @@
 
 @property (nonatomic, strong, readonly) MDAlertAction *action;
 
-@property (nonatomic, assign) BOOL titleAlignmentCenter;
-
 @end
 
 @interface _MDAlertControllerCheckCell : _MDAlertControllerCell
@@ -63,6 +61,8 @@
 @property (nonatomic, assign) MDAlertControllerAnimationOptions direction;
 @property (nonatomic, assign) MDAlertControllerAnimationOptions curveOptions;
 
+@property (nonatomic, assign) UIEdgeInsets separatorInset;
+
 @property (nonatomic, strong, readonly) UIButton *dismissButton;
 @property (nonatomic, strong, readonly) UIView *wrapperView;
 @property (nonatomic, strong, readonly) UIView *contentView;
@@ -77,6 +77,7 @@
 - (CABasicAnimation *)positionAnimationForDisplaying:(BOOL)displaying;
 
 - (void)reload;
+- (void)displaying:(BOOL)displaying;
 
 - (void)display:(BOOL)displaying animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion;
 - (void)display:(BOOL)displaying duration:(CGFloat)duration animations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion;

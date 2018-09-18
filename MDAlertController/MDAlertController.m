@@ -65,16 +65,12 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)_layoutSubviews {
     CGRect bounds = self.contentView.bounds;
     CGSize imageSize = self.iconImageView.image.size;
+
     CGFloat imageY = (CGRectGetHeight(bounds) - imageSize.height) / 2.;
-    
     self.iconImageView.frame = (CGRect){20, imageY, imageSize};
-    
-    CGSize fitSize = CGSizeMake(CGRectGetWidth(bounds) - (20 + imageSize.width + 16) * (self.titleAlignmentCenter + 1), CGRectGetHeight(bounds));
-    CGSize titleSize = [self.titleLabel sizeThatFits:fitSize];
-    CGFloat titleY = (CGRectGetHeight(bounds) - titleSize.height) / 2.;
-    CGFloat titleX = self.titleAlignmentCenter ? (CGRectGetWidth(bounds) - titleSize.width) / 2. : ((imageSize.width ? 20 : 0) + imageSize.width + 16);
-    
-    self.titleLabel.frame = (CGRect){titleX, titleY, titleSize};
+
+    CGFloat titleX = 16 + (imageSize.width > 0 ? 20 : 0) + imageSize.width;
+    self.titleLabel.frame = CGRectMake(titleX, 0, CGRectGetWidth(bounds) - titleX - 16, CGRectGetHeight(bounds));
 }
 
 - (void)_updateContentView {
@@ -97,12 +93,6 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         
         [self _updateContentView];
     }
-}
-
-- (void)setTitleAlignmentCenter:(BOOL)titleAlignmentCenter {
-    _titleAlignmentCenter = titleAlignmentCenter;
-    
-    [self setNeedsLayout];
 }
 
 @end
@@ -234,6 +224,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 @synthesize backgroundView = _backgroundView, wrapperView = _wrapperView, contentView = _contentView;
 @synthesize customView = _customView, dismissButton = _dismissButton;
 @synthesize welt = _welt, direction = _direction, curveOptions = _curveOptions;
+@synthesize separatorInset = _separatorInset;
 
 @dynamic tintColor;
 
@@ -299,10 +290,9 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)_initializeSubviews {
-    self.backgroundView.hidden = YES;
+    self.hidden = YES;
     self.backgroundView.layer.masksToBounds = YES;
 
-    self.wrapperView.hidden = YES;
     self.wrapperView.layer.masksToBounds = YES;
     self.wrapperView.backgroundColor = [UIColor whiteColor];
     
@@ -318,6 +308,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     self.tableView.separatorColor = self.tintColor;
+    self.tableView.separatorInset = UIEdgeInsetsZero;
     self.tableView.backgroundColor = [UIColor whiteColor];
     
     self.tableView.rowHeight = 0;
@@ -431,9 +422,8 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
 
     animation.duration = duration;
-
     animation.removedOnCompletion = NO;
-    animation.fillMode = kCAFillModeForwards;
+    animation.fillMode = kCAFillModeBoth;
     animation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
 
     return animation;
@@ -485,6 +475,8 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     if (animations.count >= 2) {
         CAAnimationGroup *group = [CAAnimationGroup animation];
         group.animations = animations;
+        group.removedOnCompletion = NO;
+        group.fillMode = kCAFillModeBoth;
 
         animation = group;
     }
@@ -492,8 +484,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [self.wrapperView.layer addAnimation:animation forKey:MDAlertControllerWrapperAnimationKey];
     [self.backgroundView.layer addAnimation:backgroundAnimation forKey:MDAlertControllerBackgroundAnimationKey];
 
-    self.backgroundView.hidden = NO;
-    self.wrapperView.hidden = NO;
+    self.hidden = NO;
 }
 
 - (void)_display:(BOOL)displaying duration:(CGFloat)duration animations:(NSArray<CAAnimation *> *)animations completion:(void (^)(void))completion {
@@ -530,8 +521,15 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 #pragma mark - public
 
 - (void)reload {
+    self.tableView.separatorInset = self.separatorInset;
+
     [self _loadCustomViewIfNeeds];
     [self _loadDismissButtonIfNeeds];
+}
+
+- (void)displaying:(BOOL)displaying {
+    self.wrapperView.alpha = displaying;
+    self.backgroundView.alpha = displaying;
 }
 
 - (void)display:(BOOL)displaying animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion {
@@ -649,16 +647,25 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
     CGFloat width = CGRectGetWidth(self.bounds);
     CGFloat height = CGRectGetHeight(self.bounds);
-
-    CGSize customViewSize = self.customView.frame.size;
     CGFloat contentWidth = width;
 
-    CGFloat expectTableHeight = (self.preferredAction ? MDAlertControllerDestructiveFooterViewHeight : 0) + (self.actions.count * MDAlertControllerRowHeight);
+    CGSize customViewSize = self.customView.frame.size;
+    customViewSize.width = MIN(width, customViewSize.width);
+
     CGFloat titleHeight = [self.titleLabel sizeThatFits:CGSizeMake(contentWidth, CGFLOAT_MAX)].height;
     CGFloat messageHeight = [self.messageLabel sizeThatFits:CGSizeMake(contentWidth, CGFLOAT_MAX)].height;
-    CGFloat tableViewHeight = MIN(height - customViewSize.height - titleHeight - messageHeight, expectTableHeight);;
+    CGFloat headerHeight = titleHeight + messageHeight + customViewSize.height;
+    CGFloat actionContentHeight = (self.preferredAction ? MDAlertControllerDestructiveFooterViewHeight : 0) + (self.actions.count * MDAlertControllerRowHeight);
 
-    CGFloat contentHeight = customViewSize.height + titleHeight + messageHeight + tableViewHeight;
+    CGFloat maxActionContentHeight = height - headerHeight;
+    if (maxActionContentHeight < actionContentHeight && customViewSize.height > 0) {
+        customViewSize.height = MAX(0, customViewSize.height - actionContentHeight + maxActionContentHeight);
+        headerHeight = titleHeight + messageHeight + customViewSize.height;
+        maxActionContentHeight = height - headerHeight;
+    }
+    actionContentHeight = MIN(actionContentHeight, maxActionContentHeight);
+
+    CGFloat contentHeight = headerHeight + actionContentHeight;
 
     BOOL welt = self.welt;
     BOOL top = self.direction == MDAlertControllerAnimationOptionDirectionFromTop;
@@ -678,7 +685,16 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     self.customView.frame = (CGRect){(contentWidth - customViewSize.width) / 2., offsetY, customViewSize};
 
     offsetY += customViewSize.height;
-    self.tableView.frame = (CGRect){0, offsetY, contentWidth, tableViewHeight};
+    self.tableView.frame = (CGRect){0, offsetY, contentWidth, actionContentHeight};
+}
+
+- (_MDAlertControllerCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    MDAlertAction *action = self.actions[[indexPath row]];
+    _MDAlertControllerCell *cell = (_MDAlertControllerCell *)[super tableView:tableView cellForRowAtIndexPath:indexPath];
+
+    cell.titleLabel.textAlignment = action.titleAlignment;
+
+    return cell;
 }
 
 #pragma mark - public
@@ -719,16 +735,17 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 @implementation _MDAlertContentView
 
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        [self _updateTintColor];
+    }
+    return self;
+}
+
 - (void)tintColorDidChange {
     [super tintColorDidChange];
-    
-    self.lineView.backgroundColor = self.tintColor;
-    
-    [self.lines setValue:self.tintColor forKey:@"backgroundColor"];
-    
-    for (UIButton *button in self.buttons) {
-        [button setTitleColor:self.tintColor forState:UIControlStateNormal];
-    }
+
+    [self _updateTintColor];
 }
 
 #pragma mark - private
@@ -750,8 +767,16 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [super _initializeSubviews];
     
     self.wrapperView.layer.cornerRadius = 10.f;
-    
+}
+
+- (void)_updateTintColor {
     self.lineView.backgroundColor = self.tintColor;
+
+    [self.lines setValue:self.tintColor forKey:@"backgroundColor"];
+
+    for (UIButton *button in self.buttons) {
+        [button setTitleColor:self.tintColor forState:UIControlStateNormal];
+    }
 }
 
 - (void)_layoutSubviews {
@@ -761,6 +786,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGFloat height = CGRectGetHeight(self.bounds);
 
     CGSize customViewSize = self.customView.frame.size;
+    customViewSize.width = MIN(width, customViewSize.width);
 
     CGFloat contentWidth = self.customView ? customViewSize.width :  width * .75f;
     contentWidth = MIN(width, contentWidth);
@@ -773,7 +799,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     BOOL buttonEnabled = self.actions.count > 0;
     BOOL needsButtonContent = buttonEnabled && self.actions.count <= 2;
     CGFloat actionContentHeight = (needsButtonContent ? 1 : self.actions.count) * MDAlertControllerRowHeight;
-    actionContentHeight = MIN(actionContentHeight, height - headerHeight);
+
+    CGFloat maxActionContentHeight = height - headerHeight;
+    if (maxActionContentHeight < actionContentHeight && customViewSize.height > 0) {
+        customViewSize.height = MAX(0, customViewSize.height - actionContentHeight + maxActionContentHeight);
+        headerHeight = titleHeight + messageHeight + customViewSize.height;
+        maxActionContentHeight = height - headerHeight;
+    }
+    actionContentHeight = MIN(actionContentHeight, maxActionContentHeight);
 
     CGFloat contentHeight = headerHeight + actionContentHeight;
 
@@ -848,8 +881,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)_layoutLine:(UIView *)line atIndex:(NSUInteger)index{
     CGRect bounds = self.buttonContentView.bounds;
     CGFloat width = bounds.size.width / self.actions.count;
-    
-    line.frame = (CGRect){(index + 1) * width, 0, .5f, bounds.size.height};
+
+    CGRect frame = (CGRect){(index + 1) * width, 0, .5f, bounds.size.height};
+
+    line.frame = UIEdgeInsetsInsetRect(frame, self.separatorInset);
 }
 
 - (UIButton *)_buttonWithAction:(MDAlertAction *)action atIndex:(NSUInteger)index {
@@ -943,7 +978,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     MDAlertAction *action = self.actions[[indexPath row]];
     _MDAlertControllerCell *cell = (id)[super tableView:tableView cellForRowAtIndexPath:indexPath];
     
-    cell.titleAlignmentCenter = YES;
+    cell.titleLabel.textAlignment = NSTextAlignmentCenter;
     cell.titleLabel.font = action == self.preferredAction ? [UIFont boldSystemFontOfSize:14] : [UIFont systemFontOfSize:14];
     
     return cell;
@@ -985,6 +1020,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         _image = image;
         _style = style;
         _handler = [handler copy];
+        _titleAlignment = NSTextAlignmentLeft;
     }
     return self;
 }
@@ -1070,7 +1106,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
         self.transitionOptions = options;
 
-        self.transitioningDelegate = self;
+        super.transitioningDelegate = self;
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
 
@@ -1110,6 +1146,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 #pragma mark - accessor
+
+- (void)setTransitioningDelegate:(id<UIViewControllerTransitioningDelegate>)transitioningDelegate {
+    [super setTransitioningDelegate:self];
+}
 
 - (UIView<_MDAlertControllerContentView> *)contentView {
     if (!_contentView) {
@@ -1225,10 +1265,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     self.contentView.curveOptions = self.transitionOptions & 0xF0000;
 
     self.contentView.frame = self.view.bounds;
+    self.contentView.separatorInset = self.separatorInset;
 
     self.contentView.titleLabel.text = self.title;
     self.contentView.messageLabel.text = self.message;
-
     self.contentView.backgroundView.backgroundColor = self.backgroundColor;
     self.contentView.backgroundView.userInteractionEnabled = self.backgroundTouchabled;
     
@@ -1241,6 +1281,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)_displayAnimated:(BOOL)animated {
     if (!self.beingPresented) return;
 
+    [self.contentView displaying:NO];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self _display:YES animated:animated completion:nil];
     });
@@ -1257,12 +1298,18 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 - (void)_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion {
     MDAlertController *parent = (MDAlertController *)[self previousAlertController];
-    __weak typeof(parent) weakParent = parent;
+    __weak typeof(parent) weakSelf = self;
+    __weak typeof(self) weakParent = parent;
     void (^_completion)(void) = ^{
+        __weak typeof(weakSelf) self = weakSelf;
+        self.contentView.hidden = YES;
+
         [super dismissViewControllerAnimated:NO completion:^{
             if (completion) completion();
+
             __weak typeof(weakParent) parent = weakParent;
             parent.contentView.hidden = NO;
+
             [parent _display:YES animated:animated completion:nil];
         }];
     };
@@ -1274,7 +1321,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     void (^_completion)(void) = ^{
         if (completion) completion();
         self.animating = NO;
+
+        [self.contentView displaying:displaying];
     };
+
     if (animated && self.transitionOptions && self.preferredStyle != MDAlertControllerStyleActionSheet) {
         [self _transitWithOptions:self.transitionOptions displaying:displaying completion:_completion];
     } else {
@@ -1285,6 +1335,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         if (animated && animations.count) {
             [self.contentView display:displaying duration:self.transitionDuration animations:animations completion:_completion];
         } else {
+            [self.contentView displaying:YES];
             [self.contentView display:displaying animated:animated duration:self.transitionDuration completion:_completion];
         }
     }
@@ -1311,20 +1362,12 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)_transitWithUIOptions:(UIViewAnimationOptions)options displaying:(BOOL)displaying completion:(void (^)(void))completion {
-    self.contentView.backgroundView.hidden = NO;
-    self.contentView.wrapperView.hidden = NO;
-
-    if (displaying) {
-        self.contentView.backgroundView.alpha = displaying;
-        self.contentView.wrapperView.alpha = displaying;
-    }
-
     [UIView transitionWithView:self.contentView.wrapperView duration:self.transitionDuration options:options animations:^{
-        self.contentView.backgroundView.alpha = displaying;
-        self.contentView.wrapperView.alpha = displaying;
+        [self.contentView displaying:displaying];
     } completion:^(BOOL finished) {
         if (completion) completion();
     }];
+    self.contentView.hidden = NO;
 }
 
 #pragma mark - public
