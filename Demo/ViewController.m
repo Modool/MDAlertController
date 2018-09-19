@@ -16,7 +16,7 @@
 
 @implementation ViewController2
 
-- (void)viewDidLoad {
+- (void)viewDidLoad CG_AVAILABLE_STARTING {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blueColor];
 
