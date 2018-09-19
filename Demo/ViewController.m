@@ -83,7 +83,7 @@
     alertController.transitionDuration = arc4random() % 100 / 100. * 0.5 + .15f;
     alertController.welt = arc4random() % 2;
     alertController.overridable = arc4random() % 2;
-    alertController.backgroundOverrideOptions = MDAlertControllerBackgroundOptionExclusive;
+    alertController.backgroundOptions = MDAlertControllerBackgroundOptionExclusive;
 
     alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
     alertController.contentView.backgroundColor = [UIColor greenColor];

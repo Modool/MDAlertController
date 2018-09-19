@@ -145,7 +145,7 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 @property (nonatomic, assign, getter=isOverridable) BOOL overridable;
 
 /** Default is MDAlertControllerBackgroundOptionIntegrate. */
-@property (nonatomic, assign) MDAlertControllerBackgroundOptions backgroundOverrideOptions;
+@property (nonatomic, assign) MDAlertControllerBackgroundOptions backgroundOptions;
 
 /**
  Default transition is modal alert or action sheet,

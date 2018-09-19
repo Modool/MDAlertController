@@ -1386,7 +1386,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         viewController.previousAlertController =  self;
 
         if (self.overridable) {
-            if (viewController.backgroundOverrideOptions == MDAlertControllerBackgroundOptionExclusive) {
+            if (viewController.backgroundOptions == MDAlertControllerBackgroundOptionExclusive) {
                 self.transitionView.backgroundView.hidden = YES;
             }
         } else {
