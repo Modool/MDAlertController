@@ -1333,7 +1333,6 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         [self willMoveToParentViewController:nil];
         [self.view removeFromSuperview];
         [self removeFromParentViewController];
-        [self didMoveToParentViewController:nil];
     };
     [self _dismissAnimated:animated completion:_completion];
 }
@@ -1466,7 +1465,6 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated completion:(void (^)(void))completion {
-    [alertController willMoveToParentViewController:self];
     [self addChildViewController:alertController];
     [self.view addSubview:alertController.view];
     [alertController didMoveToParentViewController:self];
