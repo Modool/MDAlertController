@@ -141,10 +141,10 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;
 
-/** Default is NO. */
+/** Default is NO. disabled if presented for a child view controller. */
 @property (nonatomic, assign, getter=isOverridable) BOOL overridable;
 
-/** Default is MDAlertControllerBackgroundOptionIntegrate. */
+/** Default is MDAlertControllerBackgroundOptionIntegrate. disabled if presented for a child view controller. */
 @property (nonatomic, assign) MDAlertControllerBackgroundOptions backgroundOptions;
 
 /**
@@ -193,3 +193,9 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 
 @end
 
+@interface UIViewController (MDAlertController)
+
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated;
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated completion:(void (^)(void))completion;
+
+@end

@@ -16,7 +16,7 @@
 
 @implementation ViewController2
 
-- (void)viewDidLoad CG_AVAILABLE_STARTING {
+- (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blueColor];
 
@@ -56,7 +56,7 @@
     self.presented = nil;
 }
 
-- (void)presentAlert:(UIViewController *)viewController {
+- (MDAlertController *)alertController {
     MDAlertControllerStyle style = arc4random() % 2;
     MDAlertController *alertController = [MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style];
     MDAlertAction *action = [MDAlertAction actionWithTitle:@"哈哈哈" style:MDAlertActionStyleDefault handler:nil];
@@ -68,7 +68,7 @@
 
     action = [MDAlertAction actionWithTitle:@"取消" style:MDAlertActionStyleDestructive handler:nil];
     [alertController addAction:action];
-    
+
     alertController.backgroundTouchabled = YES;
 
     BOOL valid = arc4random() % 2;
@@ -96,16 +96,31 @@
 
     alertController.customView = button;
 
+    return alertController;
+}
+
+- (void)presentAlert:(UIViewController *)viewController {
+    MDAlertController *alertController = [self alertController];
+
     [viewController presentViewController:alertController animated:YES completion:nil];
     self.presented = alertController;
 }
 
+- (void)embeded {
+    MDAlertController *alertController = [self alertController];
+
+    [self embedAlertController:alertController animated:YES completion:nil];
+}
+
 - (IBAction)didClickAlert:(id)sender{
-    [self presentAlert:self];
+//    [self presentAlert:self];
+    [self embeded];
 }
 
 - (IBAction)didClickCustomButton:(id)sender{
-    [self presentAlert:self.presented];
+    UIViewController *presented = self.presented ?: self;
+    [self presentAlert:presented];
+//    [self embeded];
 }
 
 - (IBAction)didClickActionSheet:(id)sender{

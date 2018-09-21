@@ -1136,7 +1136,8 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [super viewDidAppear:animated];
 
     [self _layoutSubViews];
-    [self _displayAnimated:animated];
+
+    if (self.beingPresented) [self _displayAnimated:animated];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -1283,11 +1284,13 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 }
 
 - (void)_displayAnimated:(BOOL)animated {
-    if (!self.beingPresented) return;
+    [self _displayAnimated:animated completion:nil];
+}
 
+- (void)_displayAnimated:(BOOL)animated completion:(void (^)(void))completion {
     [self.transitionView displaying:NO];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self _display:YES animated:animated completion:nil];
+        [self _display:YES animated:animated completion:completion];
     });
 }
 
@@ -1297,26 +1300,51 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         __strong MDAlertAction *action = weakAction;
         if ([action handler]) action.handler(action);
     };
-    [self _dismissAnimated:animated completion:completion];
+
+    UIViewController *parent = self.parentViewController;
+    if (parent) {
+        [self _dismissEmbededViewControllerAnimated:animated completion:completion];
+    } else {
+        [self _dismissModalViewControllerAnimated:animated completion:completion];
+    }
+}
+
+- (void)_dismissModalViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion {
+    MDAlertController *previous = (MDAlertController *)[self previousAlertController];
+    __weak typeof(previous) weakPrevious = previous;
+    void (^_completion)(void) = ^{
+        [super dismissViewControllerAnimated:NO completion:^{
+            if (completion) completion();
+
+            __weak typeof(weakPrevious) previous = weakPrevious;
+            previous.transitionView.hidden = NO;
+            previous.transitionView.backgroundView.hidden = NO;
+
+            if (!previous.overridable) {
+                [previous _display:YES animated:animated completion:nil];
+            }
+        }];
+    };
+    [self _dismissAnimated:animated completion:_completion];
+}
+
+- (void)_dismissEmbededViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion {
+    void (^_completion)(void) = ^{
+        [self willMoveToParentViewController:nil];
+        [self.view removeFromSuperview];
+        [self removeFromParentViewController];
+        [self didMoveToParentViewController:nil];
+    };
+    [self _dismissAnimated:animated completion:_completion];
 }
 
 - (void)_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion {
-    MDAlertController *parent = (MDAlertController *)[self previousAlertController];
-    __weak typeof(parent) weakSelf = self;
-    __weak typeof(self) weakParent = parent;
+    __weak typeof(self) weakSelf = self;
     void (^_completion)(void) = ^{
         __weak typeof(weakSelf) self = weakSelf;
         self.transitionView.hidden = YES;
 
-        [super dismissViewControllerAnimated:NO completion:^{
-            if (completion) completion();
-
-            __weak typeof(weakParent) parent = weakParent;
-            parent.transitionView.hidden = NO;
-            parent.transitionView.backgroundView.hidden = NO;
-            
-            [parent _display:YES animated:animated completion:nil];
-        }];
+        if (completion) completion();
     };
     [self _display:NO animated:animated completion:_completion];
 }
@@ -1378,7 +1406,11 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 #pragma mark - public
 
 - (void)dismissViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion {
-    [self _dismissAnimated:animated completion:completion];
+    if (self.beingPresented) {
+        [self _dismissModalViewControllerAnimated:animated completion:completion];
+    } else if (self.parentViewController) {
+        [self _dismissEmbededViewControllerAnimated:animated completion:completion];
+    }
 }
 
 - (void)presentViewController:(MDAlertController *)viewController animated:(BOOL)animated completion:(void (^)(void))completion {
@@ -1423,6 +1455,23 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 - (id<UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {
     return [[_MDAlertControllerAnimationController alloc] init];
+}
+
+@end
+
+@implementation UIViewController (MDAlertController)
+
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated {
+    [self embedAlertController:alertController animated:animated completion:nil];
+}
+
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated completion:(void (^)(void))completion {
+    [alertController willMoveToParentViewController:self];
+    [self addChildViewController:alertController];
+    [self.view addSubview:alertController.view];
+    [alertController didMoveToParentViewController:self];
+
+    [alertController _displayAnimated:animated completion:completion];
 }
 
 @end
