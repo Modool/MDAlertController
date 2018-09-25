@@ -128,6 +128,9 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 /** The custom view in transition view. */
 @property (nonatomic, strong) UIView *customView;
 
+/** The custom view controller in transition view. */
+@property (nonatomic, strong) UIViewController *customViewController;
+
 /** Default is 0x000000, 0.5 */
 @property (nonatomic, strong) UIColor *backgroundColor;
 

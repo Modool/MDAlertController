@@ -1247,6 +1247,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     return self.transitionView.customView;
 }
 
+- (void)setCustomViewController:(UIViewController *)customViewController {
+    if (_customViewController != customViewController) {
+        _customViewController = customViewController;
+
+        self.customView = customViewController.view;
+    }
+}
+
 - (void)setTitle:(NSString *)title {
     [super setTitle:title];
         
@@ -1281,6 +1289,41 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         
         self.transitionView.backgroundView.backgroundColor = backgroundColor;
     }
+}
+
+#pragma mark - system accessor
+
+- (UIViewController *)childViewControllerForStatusBarStyle {
+    return _customViewController;
+}
+
+- (UIViewController *)childViewControllerForStatusBarHidden {
+    return _customViewController;
+}
+
+- (UIViewController *)childViewControllerForHomeIndicatorAutoHidden {
+    return _customViewController;
+}
+
+- (UIViewController *)childViewControllerForScreenEdgesDeferringSystemGestures {
+    return _customViewController;
+}
+
+- (BOOL)shouldAutorotate {
+    if (!_customViewController) return YES;
+    return _customViewController.shouldAutorotate;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    if (!_customViewController) return UIInterfaceOrientationMaskAll;
+
+    return _customViewController.supportedInterfaceOrientations;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    if (!_customViewController) return UIInterfaceOrientationPortrait;
+    
+    return _customViewController.preferredInterfaceOrientationForPresentation;
 }
 
 #pragma mark - private
