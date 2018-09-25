@@ -67,7 +67,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGSize imageSize = self.iconImageView.image.size;
 
     CGFloat imageY = (CGRectGetHeight(bounds) - imageSize.height) / 2.;
-    self.iconImageView.frame = (CGRect){20, imageY, imageSize};
+    self.iconImageView.frame = CGRectMake(20, imageY, imageSize.width, imageSize.height);
 
     CGFloat titleX = 16 + (imageSize.width > 0 ? 20 : 0) + imageSize.width;
     self.titleLabel.frame = CGRectMake(titleX, 0, CGRectGetWidth(bounds) - titleX - 16, CGRectGetHeight(bounds));
@@ -116,7 +116,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGFloat imageX = CGRectGetWidth(bounds) - imageSize.width - 12;
     CGFloat imageY = (CGRectGetHeight(bounds) - imageSize.height) / 2.;
     
-    self.selectedImageView.frame = (CGRect){imageX, imageY, imageSize};
+    self.selectedImageView.frame = CGRectMake(imageX, imageY, imageSize.width, imageSize.height);
 }
 
 - (void)setSelected:(BOOL)selected {
@@ -138,7 +138,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (instancetype)initWithFrame:(CGRect)frame action:(MDAlertAction *)action {
     if (self = [super initWithFrame:frame]) {
         _action = action;
-        _titleLabel = [[UILabel alloc] initWithFrame:(CGRect){0, 5, frame.size.width, frame.size.height - 5}];
+        _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 5, frame.size.width, frame.size.height - 5)];
     
         self.backgroundColor = HEXCOLOR(0xE7E7E7);
         
@@ -157,7 +157,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [super layoutSubviews];
 
     CGRect bounds = self.bounds;
-    self.titleLabel.frame = (CGRect){0, 5, bounds.size.width, bounds.size.height - 5};
+    self.titleLabel.frame = CGRectMake(0, 5, bounds.size.width, bounds.size.height - 5);
 }
 
 - (void)tintColorDidChange {
@@ -237,6 +237,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     return self;
 }
 
+- (void)dealloc {
+    [self _removeObserver];
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
 
@@ -263,6 +267,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         _actions = @[];
     }
     return _actions;
+}
+
+- (void)setCustomView:(UIView *)customView {
+    if (_customView != customView) {
+        [self _removeObserver];
+        _customView = customView;
+        [self _addObserver];
+    }
 }
 
 #pragma mark - private
@@ -402,7 +414,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     } else if (position & MDAlertActionPositionBottom && !(position & MDAlertActionPositionTop)) {
         center.y = contentSize.height;
     }
-    CGRect frame = (CGRect){center.x - size.width / 2., center.y - size.height / 2., size};
+    CGRect frame = CGRectMake(center.x - size.width / 2., center.y - size.height / 2., size.width, size.height);
 
     return frame;
 }
@@ -502,20 +514,12 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     }
 }
 
-#pragma mark - CAAnimationDelegate
+- (void)_addObserver {
+    if (_customView) [_customView addObserver:self forKeyPath:NSStringFromSelector(@selector(frame)) options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+}
 
-- (void)animationDidStop:(CABasicAnimation *)animation finished:(BOOL)flag {
-    self.userInteractionEnabled = YES;
-    
-    if (self.animatedCompletion) {
-        __weak typeof(self) weakSelf = self;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __strong typeof(weakSelf) self = weakSelf;
-            self.animatedCompletion();
-
-            [self.wrapperView.layer removeAllAnimations];
-        });
-    }
+- (void)_removeObserver {
+    if (_customView) [_customView removeObserver:self forKeyPath:NSStringFromSelector(@selector(frame))];
 }
 
 #pragma mark - public
@@ -612,6 +616,35 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     [self _respondSelectAction:action];
 }
 
+#pragma mark - CAAnimationDelegate
+
+- (void)animationDidStop:(CABasicAnimation *)animation finished:(BOOL)flag {
+    self.userInteractionEnabled = YES;
+
+    if (self.animatedCompletion) {
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) self = weakSelf;
+            self.animatedCompletion();
+
+            [self.wrapperView.layer removeAllAnimations];
+        });
+    }
+}
+
+#pragma mark - KVO
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if (![keyPath isEqualToString:NSStringFromSelector(@selector(frame))]) return;
+
+    CGRect old = [change[NSKeyValueChangeOldKey] CGRectValue];
+    CGRect new = [change[NSKeyValueChangeNewKey] CGRectValue];
+
+    if (CGRectEqualToRect(old, new)) return;
+
+    [self setNeedsLayout];
+}
+
 #pragma mark - actions
 
 - (IBAction)didTapBackgroundView:(UITapGestureRecognizer *)tapGestureRecognizer {
@@ -671,21 +704,21 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     BOOL top = self.direction == MDAlertControllerAnimationOptionDirectionFromTop;
     CGFloat contentY = welt ? (top ? 0 : height - contentHeight) : (height - contentHeight) / 2.f;
 
-    self.wrapperView.frame = (CGRect){0, contentY, contentWidth, contentHeight};
+    self.wrapperView.frame = CGRectMake(0, contentY, contentWidth, contentHeight);
 
-    self.contentView.frame = (CGRect){0, 0, contentWidth, contentHeight};
+    self.contentView.frame = CGRectMake(0, 0, contentWidth, contentHeight);
 
     CGFloat offsetY = 0;
-    self.titleLabel.frame = (CGRect){0, offsetY, contentWidth, titleHeight};
+    self.titleLabel.frame = CGRectMake(0, offsetY, contentWidth, titleHeight);
 
     offsetY += titleHeight;
-    self.messageLabel.frame = (CGRect){0, offsetY, contentWidth, messageHeight};
+    self.messageLabel.frame = CGRectMake(0, offsetY, contentWidth, messageHeight);
 
     offsetY += messageHeight;
-    self.customView.frame = (CGRect){(contentWidth - customViewSize.width) / 2., offsetY, customViewSize};
+    self.customView.frame = CGRectMake((contentWidth - customViewSize.width) / 2., offsetY, customViewSize.width, customViewSize.height);
 
     offsetY += customViewSize.height;
-    self.tableView.frame = (CGRect){0, offsetY, contentWidth, actionContentHeight};
+    self.tableView.frame = CGRectMake(0, offsetY, contentWidth, actionContentHeight);
 }
 
 - (_MDAlertControllerCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -822,26 +855,26 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGFloat contentX = vertical ? (width - contentWidth) / 2.f : value;
     CGFloat contentY = vertical ? value : (height - contentHeight) / 2.f;
 
-    self.wrapperView.frame = (CGRect){contentX, contentY, contentWidth, contentHeight};
+    self.wrapperView.frame = CGRectMake(contentX, contentY, contentWidth, contentHeight);
 
-    self.contentView.frame = (CGRect){0, 0, contentWidth, contentHeight};
+    self.contentView.frame = CGRectMake(0, 0, contentWidth, contentHeight);
 
     CGFloat offsetY = 0;
-    self.titleLabel.frame = (CGRect){0, offsetY, contentWidth, titleHeight};
+    self.titleLabel.frame = CGRectMake(0, offsetY, contentWidth, titleHeight);
 
     offsetY += titleHeight;
-    self.messageLabel.frame = (CGRect){0, offsetY, contentWidth, messageHeight};
+    self.messageLabel.frame = CGRectMake(0, offsetY, contentWidth, messageHeight);
 
     offsetY += messageHeight;
     CGFloat lineHeight = offsetY > 0 ? .5f : 0.f;
-    self.lineView.frame = (CGRect){0, offsetY, contentWidth, lineHeight};
+    self.lineView.frame = CGRectMake(0, offsetY, contentWidth, lineHeight);
 
     offsetY += lineHeight;
-    self.customView.frame = (CGRect){0, offsetY, customViewSize};
+    self.customView.frame = CGRectMake(0, offsetY, customViewSize.width, customViewSize.height);
 
     offsetY += customViewSize.height;
     UIView *actionContentView = needsButtonContent ? self.buttonContentView : self.tableView;
-    actionContentView.frame = (CGRect){0, offsetY, contentWidth, actionContentHeight};
+    actionContentView.frame = CGRectMake(0, offsetY, contentWidth, actionContentHeight);
 
     if (needsButtonContent) {
         [self.buttons enumerateObjectsUsingBlock:^(UIButton *button, NSUInteger index, BOOL *stop) {
@@ -875,14 +908,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGRect bounds = [self.buttonContentView bounds];
     CGFloat width = CGRectGetWidth(bounds) / self.actions.count;
     
-    button.frame = (CGRect){index * width, 0, width, bounds.size.height};
+    button.frame = CGRectMake(index * width, 0, width, bounds.size.height);
 }
 
 - (void)_layoutLine:(UIView *)line atIndex:(NSUInteger)index{
     CGRect bounds = self.buttonContentView.bounds;
     CGFloat width = bounds.size.width / self.actions.count;
 
-    CGRect frame = (CGRect){(index + 1) * width, 0, .5f, bounds.size.height};
+    CGRect frame = CGRectMake((index + 1) * width, 0, .5f, bounds.size.height);
 
     line.frame = UIEdgeInsetsInsetRect(frame, self.separatorInset);
 }
@@ -1301,8 +1334,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         if ([action handler]) action.handler(action);
     };
 
-    UIViewController *parent = self.parentViewController;
-    if (parent) {
+    if (self.parentViewController) {
         [self _dismissEmbededViewControllerAnimated:animated completion:completion];
     } else {
         [self _dismissModalViewControllerAnimated:animated completion:completion];
@@ -1405,10 +1437,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 #pragma mark - public
 
 - (void)dismissViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion {
-    if (self.beingPresented) {
-        [self _dismissModalViewControllerAnimated:animated completion:completion];
-    } else if (self.parentViewController) {
+    if (self.parentViewController) {
         [self _dismissEmbededViewControllerAnimated:animated completion:completion];
+    } else {
+        [self _dismissModalViewControllerAnimated:animated completion:completion];
     }
 }
 

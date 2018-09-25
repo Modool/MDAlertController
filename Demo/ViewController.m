@@ -88,13 +88,18 @@
     alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
     alertController.contentView.backgroundColor = [UIColor greenColor];
 
-    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];;
-    button.backgroundColor = [UIColor colorWithRed:arc4random() % 255 / 255. green:arc4random() % 255 / 255. blue:arc4random() % 255 / 255. alpha:1];
-    [button setTitle:@"Button" forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor blueColor] forState:UIControlStateNormal];
-    [button addTarget:self action:@selector(didClickCustomButton:) forControlEvents:UIControlEventTouchUpInside];
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+    label.text = @"哈哈哈";
+    label.userInteractionEnabled = YES;
+    label.textColor = [UIColor blueColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.backgroundColor = [UIColor colorWithRed:arc4random() % 255 / 255. green:arc4random() % 255 / 255. blue:arc4random() % 255 / 255. alpha:1];
+    label.numberOfLines = 10000;
 
-    alertController.customView = button;
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didClickCustomView:)];
+    [label addGestureRecognizer:tap];
+
+    alertController.customView = label;
 
     return alertController;
 }
@@ -117,7 +122,13 @@
     [self embeded];
 }
 
-- (IBAction)didClickCustomButton:(id)sender{
+- (IBAction)didClickCustomView:(UITapGestureRecognizer *)sender{
+//    UILabel *label = (UILabel *)[sender view];
+//
+//    label.text = @"fnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfsofnsfnoneofiosnfoesnfisfiesnfsnefoenfisenfosiefnsiefnesifnsofenfso";
+//
+//    [label sizeToFit];
+//    sender.frame = CGRectMake(0, 0, 100, 100);
     UIViewController *presented = self.presented ?: self;
     [self presentAlert:presented];
 //    [self embeded];
