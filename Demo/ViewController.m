@@ -86,7 +86,7 @@
     alertController.backgroundOptions = MDAlertControllerBackgroundOptionExclusive;
 
     alertController.separatorInset = UIEdgeInsetsMake(0, 10, 0, 10);
-    alertController.contentView.backgroundColor = [UIColor greenColor];
+    alertController.contentView.backgroundColor = [UIColor clearColor];
 
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
     label.text = @"哈哈哈";
@@ -100,6 +100,10 @@
     [label addGestureRecognizer:tap];
 
     alertController.customView = label;
+
+    alertController.cancelation = ^(MDAlertController *alertController) {
+        
+    };
 
     return alertController;
 }

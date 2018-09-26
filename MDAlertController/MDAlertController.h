@@ -165,6 +165,9 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 /** Default is NO to align center. */
 @property (nonatomic, assign, getter=isWelt) BOOL welt;
 
+/** Cancelation callback when background view is tapped or other canceling event happened. */
+@property (nonatomic, copy) void (^cancelation)(MDAlertController *alertController);
+
 + (instancetype)alertControllerWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle;
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message preferredStyle:(MDAlertControllerStyle)preferredStyle NS_DESIGNATED_INITIALIZER;
 
