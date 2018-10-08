@@ -2,8 +2,8 @@
 //  MDAlertController.m
 //  MDAlertController
 //
-//  Created by xulinfeng on 2017/10/24.
-//  Copyright © 2017年 Modool. All rights reserved.
+//  Created by xulinfeng on 2018/8/24.
+//  Copyright © 2018年 Modool. All rights reserved.
 //
 
 #import <objc/runtime.h>
@@ -42,7 +42,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)tintColorDidChange {
     [super tintColorDidChange];
 
-    self.titleLabel.textColor = self.tintColor;
+    self.titleLabel.textColor = self.action.color ?: self.tintColor;
 }
 
 #pragma mark - private
@@ -79,6 +79,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
     self.titleLabel.font = self.action.font ?: (self.action.style == MDAlertActionStyleCancel ? [UIFont boldSystemFontOfSize:14] : [UIFont systemFontOfSize:14]);
     self.titleLabel.textColor = self.action.color ?: self.tintColor;
+    self.titleLabel.textAlignment = self.action.titleAlignment;
 
     self.contentView.backgroundColor = self.action.backgroundColor;
 
@@ -163,7 +164,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)tintColorDidChange {
     [super tintColorDidChange];
 
-    self.titleLabel.textColor = self.tintColor;
+    self.titleLabel.textColor = self.action.color ?: self.tintColor;
 }
 
 @end
@@ -224,7 +225,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 @synthesize backgroundView = _backgroundView, wrapperView = _wrapperView, contentView = _contentView;
 @synthesize customView = _customView, dismissButton = _dismissButton;
 @synthesize welt = _welt, direction = _direction, curveOptions = _curveOptions;
-@synthesize separatorInset = _separatorInset;
+@synthesize separatorInset = _separatorInset, separatorColor = _separatorColor;
 
 @dynamic tintColor;
 
@@ -251,10 +252,10 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 - (void)tintColorDidChange {
     [super tintColorDidChange];
 
-    self.titleLabel.textColor = self.tintColor;
-    self.messageLabel.textColor = self.tintColor;
+    self.titleLabel.textColor = self.titleLabel.textColor ?: self.tintColor;
+    self.messageLabel.textColor = self.messageLabel.textColor ?: self.tintColor;
 
-    self.tableView.separatorColor = self.tintColor;
+    self.tableView.separatorColor = self.separatorColor ?: self.tintColor;
     self.tableView.tableFooterView.tintColor = self.tintColor;
 
     [self.tableView reloadData];
@@ -722,6 +723,8 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     self.tableView.frame = CGRectMake(0, offsetY, contentWidth, actionContentHeight);
 }
 
+#pragma mark - UITableViewDataSource
+
 - (_MDAlertControllerCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     MDAlertAction *action = self.actions[[indexPath row]];
     _MDAlertControllerCell *cell = (_MDAlertControllerCell *)[super tableView:tableView cellForRowAtIndexPath:indexPath];
@@ -822,7 +825,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     CGSize customViewSize = self.customView.frame.size;
     customViewSize.width = MIN(width, customViewSize.width);
 
-    CGFloat contentWidth = self.customView ? customViewSize.width :  width * .75f;
+    CGFloat contentWidth = self.customView ? customViewSize.width :  270.f;
     contentWidth = MIN(width, contentWidth);
 
     CGFloat titleHeight = [self.titleLabel sizeThatFits:CGSizeMake(contentWidth, CGFLOAT_MAX)].height;
@@ -1012,7 +1015,6 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
     MDAlertAction *action = self.actions[[indexPath row]];
     _MDAlertControllerCell *cell = (id)[super tableView:tableView cellForRowAtIndexPath:indexPath];
 
-    cell.titleLabel.textAlignment = NSTextAlignmentCenter;
     cell.titleLabel.font = action == self.preferredAction ? [UIFont boldSystemFontOfSize:14] : [UIFont systemFontOfSize:14];
 
     return cell;
@@ -1054,7 +1056,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
         _image = image;
         _style = style;
         _handler = [handler copy];
-        _titleAlignment = NSTextAlignmentLeft;
+        _titleAlignment = NSTextAlignmentCenter;
     }
     return self;
 }
@@ -1188,6 +1190,14 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
 - (UIView *)contentView {
     return self.transitionView.wrapperView;
+}
+
+- (UILabel *)titleLabel {
+    return self.transitionView.titleLabel;
+}
+
+- (UILabel *)messageLabel {
+    return self.transitionView.messageLabel;
 }
 
 - (UIView<_MDAlertControllerTransitionView> *)transitionView {
@@ -1348,6 +1358,7 @@ NSString *const MDAlertControllerBackgroundAnimationKey = @"background.view.anim
 
     self.transitionView.frame = self.view.bounds;
     self.transitionView.separatorInset = self.separatorInset;
+    self.transitionView.separatorColor = self.separatorColor;
 
     self.transitionView.titleLabel.text = self.title;
     self.transitionView.messageLabel.text = self.message;

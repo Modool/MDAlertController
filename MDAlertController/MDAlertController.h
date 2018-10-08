@@ -2,8 +2,8 @@
 //  MDAlertController.h
 //  MDAlertController
 //
-//  Created by xulinfeng on 2018/3/21.
-//  Copyright © 2018年 markejave. All rights reserved.
+//  Created by xulinfeng on 2018/8/24.
+//  Copyright © 2018年 Modool. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -133,13 +133,16 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 
 /** Default is 0x000000, 0.5 */
 @property (nonatomic, strong) UIColor *backgroundColor;
-
 @property (nonatomic, strong) UIColor *tintColor;
 
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, copy) NSString *message;
 
+@property (nonatomic, strong, readonly) UILabel *titleLabel;
+@property (nonatomic, strong, readonly) UILabel *messageLabel;
+
 @property (nonatomic, assign) UIEdgeInsets separatorInset;
+@property (nonatomic, strong) UIColor *separatorColor;
 
 @property (nonatomic, strong) CAAnimation *presentingAnimation;
 @property (nonatomic, strong) CAAnimation *dismissingAnimation;

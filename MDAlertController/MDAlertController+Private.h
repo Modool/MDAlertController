@@ -2,7 +2,7 @@
 //  MDAlertController+Private.h
 //  MDAlertController
 //
-//  Created by xulinfeng on 2018/3/13.
+//  Created by xulinfeng on 2018/8/24.
 //  Copyright © 2018年 Modool. All rights reserved.
 //
 
@@ -62,6 +62,7 @@
 @property (nonatomic, assign) MDAlertControllerAnimationOptions curveOptions;
 
 @property (nonatomic, assign) UIEdgeInsets separatorInset;
+@property (nonatomic, strong) UIColor *separatorColor;
 
 @property (nonatomic, strong, readonly) UIButton *dismissButton;
 @property (nonatomic, strong, readonly) UIView *wrapperView;

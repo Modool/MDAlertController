@@ -2,7 +2,7 @@
 //  MDAlertController+Additions.m
 //  MDAlertController
 //
-//  Created by xulinfeng on 2018/2/8.
+//  Created by xulinfeng on 2018/8/24.
 //  Copyright © 2018年 Modool. All rights reserved.
 //
 
