@@ -2,7 +2,7 @@
 //  MDAlertController+Private.h
 //  MDAlertController
 //
-//  Created by xulinfeng on 2018/8/24.
+//  Created by xulinfeng on 2018/3/13.
 //  Copyright © 2018年 Modool. All rights reserved.
 //
 
@@ -26,6 +26,7 @@
 
 @interface _MDAlertControllerDestructiveFooterView : UIControl
 
+@property (nonatomic, strong, readonly) UIView *separatorView;
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
 
 @property (nonatomic, strong, readonly) MDAlertAction *action;
@@ -34,7 +35,10 @@
 
 @end
 
-@interface _MDAlertControllerTextLabel : UILabel
+@interface _MDAlertControllerTitleLabel : UILabel
+@end
+
+@interface _MDAlertControllerMessageLabel : UILabel
 @end
 
 @protocol _MDAlertControllerTransitionView;
@@ -120,8 +124,24 @@
 
 @property (nonatomic, strong, readonly) UIView<_MDAlertControllerTransitionView> *transitionView;
 
+@property (nonatomic, strong) UIViewController *sourceViewController;
+
 @property (nonatomic, strong) MDAlertController *previousAlertController;
-@property (nonatomic, assign) BOOL animating;
+
+- (void)_layoutSubViews;
+- (void)_updateView:(UIView *)view tintColor:(UIColor *)tintColor;
+- (void)_reloadData;
+- (void)_displayControllerAnimated:(BOOL)animated;
+- (void)_displayControllerAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_dismissControllerAnimated:(BOOL)animated action:(MDAlertAction *)action;
+- (void)_dismissControllerAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_dismissModalViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_dismissEmbededViewControllerAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_display:(BOOL)displaying animated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)_transitWithOptions:(MDAlertControllerAnimationOptions)options displaying:(BOOL)displaying completion:(void (^)(void))completion;
+- (void)_transitWithAdditionalOptionsForDisplaying:(BOOL)displaying completion:(void (^)(void))completion;
+- (void)_transitWithUIOptions:(UIViewAnimationOptions)options displaying:(BOOL)displaying completion:(void (^)(void))completion;
 
 @end
 

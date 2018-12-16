@@ -2,8 +2,8 @@
 //  MDAlertController.h
 //  MDAlertController
 //
-//  Created by xulinfeng on 2018/8/24.
-//  Copyright © 2018年 Modool. All rights reserved.
+//  Created by xulinfeng on 2018/3/21.
+//  Copyright © 2018年 markejave. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -35,8 +35,8 @@ typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
 + (instancetype)actionWithTitle:(NSString *)title style:(MDAlertActionStyle)style handler:(void (^)(MDAlertAction *action))handler;
 + (instancetype)actionWithTitle:(NSString *)title image:(UIImage *)image style:(MDAlertActionStyle)style handler:(void (^)(MDAlertAction *action))handler;
 
-+ (instancetype)cancelActionWithTitle:(NSString *)title;
-+ (instancetype)cancelActionWithTitle:(NSString *)title image:(UIImage *)image;
++ (instancetype)cancelableActionWithTitle:(NSString *)title;
++ (instancetype)cancelableActionWithTitle:(NSString *)title image:(UIImage *)image;
 
 + (instancetype)destructiveActionWithTitle:(NSString *)title;
 + (instancetype)destructiveActionWithTitle:(NSString *)title image:(UIImage *)image;
@@ -55,7 +55,7 @@ typedef NS_ENUM(NSUInteger, MDAlertActionPosition) {
 @property (nonatomic, strong) UIColor *color;
 
 /** Default is left, disabled for alert. */
-@property (nonatomic, assign) NSTextAlignment titleAlignment;
+@property (nonatomic, assign) NSTextAlignment alignment;
 
 @property (nonatomic, strong) UIColor *backgroundColor;
 
@@ -178,6 +178,13 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 
 @end
 
+@interface UIViewController (MDAlertController)
+
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated;
+- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated completion:(void (^)(void))completion;
+
+@end
+
 @interface MDAlertController (Additions)
 
 + (instancetype)alert;
@@ -200,11 +207,16 @@ typedef NS_ENUM(NSUInteger, MDAlertControllerBackgroundOptions) {
 - (instancetype)actionNamed:(NSString *)title image:(UIImage *)image handler:(void (^)(MDAlertAction *action))handler;
 - (instancetype)actionNamed:(NSString *)title image:(UIImage *)image style:(MDAlertActionStyle)style handler:(void (^)(MDAlertAction *action))handler;
 
-@end
+- (instancetype)cancelableActionNamed:(NSString *)title;
+- (instancetype)cancelableActionNamed:(NSString *)title image:(UIImage *)image;
 
-@interface UIViewController (MDAlertController)
+- (instancetype)cancelableActionNamed:(NSString *)title handler:(void (^)(MDAlertAction *action))handler;
+- (instancetype)cancelableActionNamed:(NSString *)title image:(UIImage *)image handler:(void (^)(MDAlertAction *action))handler;
 
-- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated;
-- (void)embedAlertController:(MDAlertController *)alertController animated:(BOOL)animated completion:(void (^)(void))completion;
+- (instancetype)destructiveActionNamed:(NSString *)title;
+- (instancetype)destructiveActionNamed:(NSString *)title image:(UIImage *)image;
+
+- (instancetype)destructiveActionNamed:(NSString *)title handler:(void (^)(MDAlertAction *action))handler;
+- (instancetype)destructiveActionNamed:(NSString *)title image:(UIImage *)image handler:(void (^)(MDAlertAction *action))handler;
 
 @end

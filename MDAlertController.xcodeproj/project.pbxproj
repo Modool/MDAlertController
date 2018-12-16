@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		086716D9216B7337000472C8 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 086716D8216B7337000472C8 /* NavigationController.m */; };
 		08AD79E12062A8C6004122D2 /* MDAlertController.h in Headers */ = {isa = PBXBuildFile; fileRef = 08AD79D82062A8C6004122D2 /* MDAlertController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		08AD79E22062A8C6004122D2 /* MDAlertController.m in Sources */ = {isa = PBXBuildFile; fileRef = 08AD79D92062A8C6004122D2 /* MDAlertController.m */; };
 		08AD79E32062A8C6004122D2 /* MDAlertController+Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = 08AD79DA2062A8C6004122D2 /* MDAlertController+Additions.m */; };
@@ -44,6 +45,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		086716D7216B7337000472C8 /* NavigationController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NavigationController.h; sourceTree = "<group>"; };
+		086716D8216B7337000472C8 /* NavigationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
 		08AD79CB2062A83B004122D2 /* MDAlertController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MDAlertController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		08AD79CF2062A83B004122D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		08AD79D82062A8C6004122D2 /* MDAlertController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MDAlertController.h; sourceTree = "<group>"; };
@@ -115,6 +118,8 @@
 			children = (
 				08AD79F42062B5D4004122D2 /* AppDelegate.h */,
 				08AD79F52062B5D4004122D2 /* AppDelegate.m */,
+				086716D7216B7337000472C8 /* NavigationController.h */,
+				086716D8216B7337000472C8 /* NavigationController.m */,
 				08AD79F72062B5D4004122D2 /* ViewController.h */,
 				08AD79F82062B5D4004122D2 /* ViewController.m */,
 				08AD79FA2062B5D4004122D2 /* Main.storyboard */,
@@ -251,6 +256,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				08AD79F92062B5D4004122D2 /* ViewController.m in Sources */,
+				086716D9216B7337000472C8 /* NavigationController.m in Sources */,
 				08AD7A042062B5D5004122D2 /* main.m in Sources */,
 				08AD79F62062B5D4004122D2 /* AppDelegate.m in Sources */,
 			);

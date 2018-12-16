@@ -133,9 +133,14 @@
 //
 //    [label sizeToFit];
 //    sender.frame = CGRectMake(0, 0, 100, 100);
+
+    UIViewController *top = [self.navigationController topViewController];
+    UIViewController *visible = [self.navigationController visibleViewController];
+
     UIViewController *presented = self.presented ?: self;
     [self presentAlert:presented];
 //    [self embeded];
+
 }
 
 - (IBAction)didClickActionSheet:(id)sender{
@@ -151,6 +156,18 @@
     alertController.customView = customView;
 
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (BOOL)shouldAutorotate {
+    return YES;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationLandscapeLeft;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskAll;
 }
 
 @end
