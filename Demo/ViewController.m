@@ -60,7 +60,7 @@
     MDAlertControllerStyle style = arc4random() % 2;
     MDAlertController *alertController = [MDAlertController alertControllerWithTitle:@"title" message:@"message" preferredStyle:style];
     MDAlertAction *action = [MDAlertAction actionWithTitle:@"哈哈哈" style:MDAlertActionStyleDefault handler:nil];
-    action.titleAlignment = NSTextAlignmentCenter;
+//    action.titleAlignment = NSTextAlignmentCenter;
     [alertController addAction:action];
 
     action = [MDAlertAction actionWithTitle:@"确定" style:MDAlertActionStyleDefault handler:nil];
@@ -122,8 +122,8 @@
 }
 
 - (IBAction)didClickAlert:(id)sender{
-//    [self presentAlert:self];
-    [self embeded];
+    [self presentAlert:self];
+//    [self embeded];
 }
 
 - (IBAction)didClickCustomView:(UITapGestureRecognizer *)sender{

@@ -8,26 +8,27 @@
 
 #import "MDAlertController.h"
 
-@interface _MDAlertControllerCell : UITableViewCell
-
-@property (nonatomic, strong, readonly) UIImageView *iconImageView;
-
+@interface _MDAlertControllerCell : UITableViewCell {
+@protected
+    UIImageView *_iconImageView;
+    MDAlertAction *_action;
+}
 @property (nonatomic, strong, readonly) UILabel *titleLabel;
-
-@property (nonatomic, strong, readonly) MDAlertAction *action;
 
 @end
 
-@interface _MDAlertControllerCheckCell : _MDAlertControllerCell
-
-@property (nonatomic, strong, readonly) UIImageView *selectedImageView;
+@interface _MDAlertControllerCheckCell : _MDAlertControllerCell {
+@protected
+    UIImageView *_selectedImageView;
+}
 
 @end
 
-@interface _MDAlertControllerDestructiveFooterView : UIControl
-
-@property (nonatomic, strong, readonly) UIView *separatorView;
-@property (nonatomic, strong, readonly) UILabel *titleLabel;
+@interface _MDAlertControllerDestructiveFooterView : UIControl {
+@protected
+    UIView *_separatorView;
+    UILabel *_titleLabel;
+}
 
 @property (nonatomic, strong, readonly) MDAlertAction *action;
 
@@ -89,10 +90,34 @@
 
 @end
 
-@interface _MDAlertControllerTransitionView : UIView <_MDAlertControllerTransitionView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource>
+@interface _MDAlertControllerTransitionView : UIView <_MDAlertControllerTransitionView, CAAnimationDelegate, UITableViewDelegate, UITableViewDataSource> {
+@protected
+    __weak id<_MDAlertControllerContentViewDelegate> _delegate;
 
-@property (nonatomic, strong, readonly) UITableView *tableView;
-@property (nonatomic, strong, readonly) UITapGestureRecognizer *tapGestureRecognizer;
+    NSArray<MDAlertAction *> *_actions;
+
+    MDAlertAction *_preferredAction;
+    MDAlertDismissAction *_dismissAction;
+
+    UIView *_customView;
+    UITableView *_tableView;
+    UITapGestureRecognizer *_tapGestureRecognizer;
+
+    BOOL _welt;
+    MDAlertControllerAnimationOptions _direction;
+    MDAlertControllerAnimationOptions _curveOptions;
+
+    UIEdgeInsets _separatorInset;
+    UIColor *_separatorColor;
+
+    UIButton *_dismissButton;
+    UIView *_wrapperView;
+    UIView *_contentView;
+    UIView *_backgroundView;
+    UILabel *_titleLabel;
+    UILabel *_messageLabel;
+
+}
 
 @property (nonatomic, copy) void (^animatedCompletion)(void);
 
@@ -118,15 +143,15 @@
 
 @end
 
-@interface MDAlertController ()<_MDAlertControllerContentViewDelegate, UIViewControllerTransitioningDelegate>
+@interface MDAlertController ()<_MDAlertControllerContentViewDelegate, UIViewControllerTransitioningDelegate> {
+    NSMutableArray<MDAlertAction *> *_actions;
+    NSMutableArray<MDAlertAction *> *_rowActions;
+}
 
-@property (nonatomic, copy, readonly) NSArray<MDAlertAction *> *rowActions;
+@property (nonatomic, strong, readonly) UIView<_MDAlertControllerTransitionView> *transitionView;;
+@property (nonatomic, weak) MDAlertController *previousAlertController;
 
-@property (nonatomic, strong, readonly) UIView<_MDAlertControllerTransitionView> *transitionView;
-
-@property (nonatomic, strong) UIViewController *sourceViewController;
-
-@property (nonatomic, strong) MDAlertController *previousAlertController;
+@property (nonatomic, weak, readonly) UIViewController *sourceViewController;
 
 - (void)_layoutSubViews;
 - (void)_updateView:(UIView *)view tintColor:(UIColor *)tintColor;
